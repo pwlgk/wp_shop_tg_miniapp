@@ -1,6 +1,6 @@
 // src/api/services/user.api.ts
 import api from '@/api';
-import type { LoyaltyHistory, UserDashboard, UserProfile, UserUpdate } from '@/types';
+import type { LoyaltyHistory, ReferralInfo, UserDashboard, UserProfile, UserUpdate } from '@/types';
 
 // Эта функция остаётся для HomePage
 export const getDashboard = async (): Promise<UserDashboard> => {
@@ -27,5 +27,10 @@ export const updateMe = async (userData: UserUpdate): Promise<UserProfile> => {
 
 export const getLoyaltyHistory = async (): Promise<LoyaltyHistory> => {
     const { data } = await api.get<LoyaltyHistory>('/users/me/loyalty-history');
+    return data;
+};
+
+export const getReferralInfo = async (): Promise<ReferralInfo> => {
+    const { data } = await api.get<ReferralInfo>('/users/me/referral-info');
     return data;
 };

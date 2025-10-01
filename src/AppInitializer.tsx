@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import App from './App';
 import { motion } from 'framer-motion';
 import { ErrorPage } from './pages/ErrorPage';
+import { useQuery } from '@tanstack/react-query';
+import { getDashboard } from './api/services/user.api';
 
 const AppLoader = () => (
     <div className="flex items-center justify-center h-screen w-screen bg-background">
@@ -22,31 +24,34 @@ const AppLoader = () => (
 );
 export const AppInitializer = () => {
     const navigate = useNavigate();
-    
     const [isNavigationDone, setIsNavigationDone] = useState(false);
 
     const isHydrated = useIsHydrated();
     const { isLoading: isAuthLoading, error, isAuthenticated } = useAuth(isHydrated);
-    
     const { path: deepLinkPath, isFirstInSession } = useDeepLink();
-
+    const { data: dashboard, isLoading: isDashboardLoading } = useQuery({
+        queryKey: ['dashboard'],
+        queryFn: getDashboard,
+        enabled: isAuthenticated,
+        retry: false, // Не повторяем запрос, если он упал (например, из-за 401)
+    });
     useEffect(() => {
         if (!isNavigationDone) {
             if (deepLinkPath) {
-                // Если это ПЕРВЫЙ deep link в сессии - ЗАМЕНЯЕМ историю ('/')
-                // Если НЕ ПЕРВЫЙ (например, открыли вторую ссылку из чата) - ДОБАВЛЯЕМ в историю
                 navigate(deepLinkPath, { replace: isFirstInSession });
             }
             setIsNavigationDone(true);
         }
     }, [deepLinkPath, isFirstInSession, isNavigationDone, navigate]);
 
-    const isLoading = !isHydrated || isAuthLoading || !isNavigationDone;
-
+    // Убрали isDashboardLoading из проверки
+    const isLoading = !isHydrated || isAuthLoading || (isAuthenticated && isDashboardLoading);
     if (isLoading) {
         return <AppLoader />;
     }
-    
+    if (dashboard?.is_blocked) {
+        return <ErrorPage statusCode={403} message="Ваш аккаунт заблокирован. Пожалуйста, свяжитесь с поддержкой." />;
+    }
     if (error) {
         // Показываем универсальную страницу ошибки, если аутентификация не удалась
         return <ErrorPage statusCode={503} message="Не удалось связаться с сервером. Пожалуйста, проверьте ваше интернет-соединение." />;

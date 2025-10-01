@@ -76,7 +76,7 @@ export const CartPage = () => {
 
   return (
     <div className="pb-32">
-      <div className="p-4 border-b">
+      <div className="p-4 ">
         <h1 className="text-3xl font-bold">Корзина</h1>
       </div>
 
@@ -108,7 +108,7 @@ export const CartPage = () => {
       </div>
       
       {/* --- ОБНОВЛЕННЫЙ МИНИМАЛИСТИЧНЫЙ ФУТЕР --- */}
-            <footer className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
+            <footer className="fixed bottom-0 left-0 right-0 p-4 bg-background">
           <div className="flex justify-between items-center mb-2">
             <span className="text-muted-foreground">Итого к оплате</span>
             <span className="text-2xl font-bold">{finalTotal.toFixed(0)} ₽</span>

@@ -1,13 +1,13 @@
 // src/components/shared/ProductCard.tsx
 import { useState, useEffect } from 'react';
 import type { Product } from '@/types';
-import { Heart, ShoppingBag, ShoppingBagIcon, ShoppingCart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Carousel, type CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
 import { useFavorite } from '@/hooks/useFavorite';
-import { useCart } from '@/hooks/useCart';
+// import { useCart } from '@/hooks/useCart';
 import { Badge } from '@/components/ui/badge';
 
 interface ProductCardProps {
@@ -16,7 +16,7 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product }: ProductCardProps) => {
     const favoriteMutation = useFavorite();
-    const { addToCart, isUpdating } = useCart();
+    // const { addToCart } = useCart();
 
     const [api, setApi] = useState<CarouselApi | null>(null);
     const [current, setCurrent] = useState(0);
@@ -30,10 +30,10 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         return () => { api.off("select", () => setCurrent(api.selectedScrollSnap())) };
     }, [api]);
 
-    const handleCartClick = (e: React.MouseEvent) => {
-        e.preventDefault(); e.stopPropagation();
-        addToCart(product, 1);
-    };
+    // const handleCartClick = (e: React.MouseEvent) => {
+    //     e.preventDefault(); e.stopPropagation();
+    //     addToCart(product, 1);
+    // };
     
     const handleFavoriteClick = (e: React.MouseEvent) => {
         e.preventDefault(); e.stopPropagation();
@@ -106,7 +106,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                                 <span className="text-sm text-muted-foreground line-through">{parseFloat(product.regular_price).toFixed(0)} ₽</span>
                             )}
                         </div>
-                        <p className="text-sm text-muted-foreground leading-snug mt-1 line-clamp-2 h-11">
+                        <p className="text-sm text-muted-foreground leading-snug mt-1 line-clamp-2 h-14">
                             {product.name}
                         </p>
                     </div>

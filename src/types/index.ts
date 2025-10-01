@@ -15,6 +15,7 @@ export interface UserDashboard {
   balance: number;
   level: string;
   has_unread_notifications: boolean;
+  profile_completion_status: 'complete' | 'new_user_prompt' | 'incomplete_profile_indicator';
   has_active_orders: boolean;
   loyalty_progress: {
     current_spending: number;
@@ -245,4 +246,22 @@ export interface OrderCreate {
   payment_method_id: string;
   points_to_spend?: number;
   coupon_code?: string | null;
+}
+
+export interface ReferralInfo {
+  referral_link: string;
+  pending_referrals: number;
+  completed_referrals: number;
+  total_earned: number;
+}
+
+export interface ShopSettings {
+  min_order_amount: number;
+  welcome_bonus_amount: number;
+  is_welcome_bonus_active: boolean;
+  max_points_payment_percentage: number;
+  referral_welcome_bonus: number; // <-- Нам нужно это
+  referrer_bonus: number; // <-- И это
+  birthday_bonus_amount: number;
+  client_data_version: number;
 }

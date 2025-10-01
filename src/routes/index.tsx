@@ -19,6 +19,7 @@ import { NotificationsPage } from '@/pages/NotificationsPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { CheckoutPage } from '@/pages/CheckoutPage';
 import { OrderSuccessPage } from '@/pages/OrderSuccessPage';
+import { ReferralPage } from '@/pages/ReferralPage';
 
 
 export const AppRoutes = () => {
@@ -28,6 +29,7 @@ export const AppRoutes = () => {
         Все страницы, которым нужен MainLayout (нижнее меню и отступ сверху)
         теперь находятся здесь.
       */}
+      
             <Route path="/" element={<MainLayout />}>
                 <Route index element={<HomePage />} />
                 <Route path="catalog" element={<CatalogPage />} />
@@ -51,7 +53,7 @@ export const AppRoutes = () => {
             <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
                         <Route path="cart" element={<CartPage />} />
-
+            <Route path="/referral" element={<ReferralPage />} /> {/* <-- НОВЫЙ РОУТ */}
 
             <Route path="*" element={<NotFoundPage />} />
         </Routes>

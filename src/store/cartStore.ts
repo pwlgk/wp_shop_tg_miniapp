@@ -6,6 +6,7 @@ interface CartState {
   items: CartItem[];
   totalItems: number;
   setCart: (items: CartItem[]) => void;
+  setTotal: (total: number) => void;
   addItem: (item: CartItem) => void;
   updateItemQuantity: (productId: number, quantity: number) => void;
   removeItem: (productId: number) => void;
@@ -21,6 +22,7 @@ export const useCartStore = create<CartState>((set) => ({
     items, 
     totalItems: calculateTotalItems(items) 
   }),
+  setTotal: (total) => set({ totalItems: total }), // <-- РЕАЛИЗАЦИЯ
   addItem: (item) => set((state) => {
     const existingItem = state.items.find(i => i.product.id === item.product.id);
     let newItems;

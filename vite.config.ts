@@ -2,7 +2,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-import fs from 'fs'
+// import fs from 'fs'
 
 // Мы убрали импорты tailwindcss и autoprefixer отсюда
 // Мы убрали секцию css: { postcss: { ... } }

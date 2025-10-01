@@ -39,7 +39,7 @@ export const ActiveOrdersCarousel = ({ orders }: { orders: Order[] }) => (
       <CarouselContent className="-ml-3">
         {orders.map(order => (
           // ИЗМЕНЕНИЕ: Уменьшаем ширину карточки
-          <CarouselItem key={order.id} className="pl-3 basis-[40%]  sm:basis-1/3">
+          <CarouselItem key={order.id} className="pl-3 basis-[45%]  sm:basis-1/3">
             <Link to={`/orders/${order.id}`} className="block h-full">
                 {/* Используем AspectRatio, чтобы сделать карточку квадратной */}
                 <AspectRatio ratio={1 / 1} className="flex flex-col justify-between p-3 border rounded-3xl hover:bg-muted/50 transition-colors">
@@ -86,7 +86,7 @@ export const ActiveOrdersCarousel = ({ orders }: { orders: Order[] }) => (
             </Link>
           </CarouselItem>
         ))}
-        <CarouselItem className="pl-3 basis-[40%] sm:basis-1/3">
+        <CarouselItem className="pl-3 basis-[45%] sm:basis-1/3">
            <Link to="/orders" className="block h-full">
             <AspectRatio ratio={1/1} className="flex flex-col items-center justify-center p-4 border rounded-3xl bg-muted/50 hover:bg-muted text-center transition-colors">
                 <p className="font-bold text-base">Все заказы</p>

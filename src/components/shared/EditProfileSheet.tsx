@@ -60,7 +60,7 @@ export const EditProfileSheet = ({ user, open, onOpenChange }: EditProfileSheetP
 
   const updateProfileMutation = useMutation({
     mutationFn: (data: UserUpdate) => updateMe(data),
-    onSuccess: (updatedUser) => {
+    onSuccess: () => {
       // При успехе инвалидируем кэши, чтобы все компоненты получили свежие данные
       queryClient.invalidateQueries({ queryKey: ['me'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });

@@ -1,5 +1,5 @@
 // src/pages/SearchPage.tsx
-import { useState, useEffect, useMemo, Fragment } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useDebounce } from 'use-debounce';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { getProducts, getCategories } from '@/api/services/catalog.api';

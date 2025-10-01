@@ -44,7 +44,7 @@ export const CartItem = ({ item, onRemove, onUpdate, isUpdating }: CartItemProps
         <motion.div
             drag="x" // Разрешаем свайп по горизонтали
             dragConstraints={{ left: 0, right: 0 }} // Ограничиваем свайп, чтобы не вылетал
-            onDragEnd={(event, info) => {
+            onDragEnd={(_event, info) => {
                 // Если свайпнули влево больше чем на 100px, вызываем удаление
                 if (info.offset.x < -100) {
                     onRemove();

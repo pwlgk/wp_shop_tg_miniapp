@@ -1,38 +1,35 @@
 // src/hooks/useAppCounters.ts
 import { useQuery } from '@tanstack/react-query';
 import { getDashboard } from '@/api/services/user.api';
+import { useCartStore } from '@/store/cartStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 
 export const useAppCounters = () => {
   const { accessToken } = useAuthStore();
+  const setCartTotal = useCartStore((state) => state.setTotal); // <-- Получаем новую функцию
   const setFavoritesTotal = useFavoritesStore((state) => state.setTotal);
   
-  // Локальное состояние для флага активных заказов
   const [hasActiveOrders, setHasActiveOrders] = useState(false);
 
-  // Запрашиваем дашборд, который содержит все нужные нам данные
   const { data: dashboardData } = useQuery({
-    queryKey: ['dashboard'], // Используем тот же ключ, что и на HomePage
+    queryKey: ['dashboard'],
     queryFn: getDashboard,
-    enabled: !!accessToken, // Запускаем только если пользователь авторизован
-    staleTime: 1000 * 60 * 5, // Кэшируем данные на 5 минут
+    enabled: !!accessToken,
+    staleTime: 1000 * 60 * 1, // Кэшируем данные на 1 минуту
   });
 
-  // Синхронизируем сторы и локальное состояние, когда приходят данные с сервера
+  // Синхронизируем сторы, когда приходят данные с сервера
   useEffect(() => {
     if (dashboardData) {
-      // Здесь мы не используем setCart, так как он ожидает массив CartItem,
-      // а в дашборде только счетчик. Обновим счетчик напрямую.
-      // Важно: нужно обновить cartStore, чтобы он умел обновлять только счетчик.
-      // Пока что оставим это, так как useCart уже синхронизирует полный состав корзины.
-      // Главное - обновить счетчик избранного и флаг заказов.
-      
+      // ИСПРАВЛЕНИЕ: Теперь обновляем оба счетчика
+      setCartTotal(dashboardData.counters.cart_items_count);
       setFavoritesTotal(dashboardData.counters.favorite_items_count);
+
       setHasActiveOrders(dashboardData.has_active_orders);
     }
-  }, [dashboardData, setFavoritesTotal]);
+  }, [dashboardData, setCartTotal, setFavoritesTotal]);
   
   return {
     hasActiveOrders,

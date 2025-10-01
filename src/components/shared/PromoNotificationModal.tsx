@@ -3,8 +3,6 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { Notification } from "@/types";
 import { PromoStory } from "./PromoStory";
 import { BirthdayStory } from "./BirthdayStory";
-import { Button } from "../ui/button";
-import { X } from "lucide-react";
 
 interface PromoNotificationModalProps {
   notification: Notification | null;
