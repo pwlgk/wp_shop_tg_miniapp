@@ -56,7 +56,7 @@ export const BannersCarousel = () => {
   }
 
   return (
-    <div className="px-4">
+    <div className="px-2">
       <Carousel 
         setApi={setApi} 
         opts={{ loop: banners.length > 1 }} 

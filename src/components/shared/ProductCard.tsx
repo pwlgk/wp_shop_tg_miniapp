@@ -56,7 +56,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                             {product.images.length > 0 ? (
                                 product.images.map(image => (
                                     <CarouselItem key={image.id}>
-                                        <img src={image.src} alt={image.alt || product.name} className="aspect-[4/5] rounded-3xl w-full object-cover"/>
+                                        <img src={image.src} alt={image.alt || product.name} className="aspect-[4/5] rounded-3xl w-full object-cover" loading="lazy"/>
                                     </CarouselItem>
                                 ))
                             ) : (

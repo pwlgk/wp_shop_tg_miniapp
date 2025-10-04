@@ -109,7 +109,7 @@ export const OrderDetailPage = () => {
 
         <div className="p-4 space-y-6">
             <div>
-                <h1 className="text-3xl font-bold">Заказ №{order.number}</h1>
+                <h1 className="text-2xl font-bold">Заказ №{order.number}</h1>
                 <p className="text-muted-foreground">
                     от {format(new Date(order.date_created), "d MMMM yyyy, HH:mm", { locale: ru })}
                 </p>

@@ -90,7 +90,7 @@ export const ProductListPage = () => {
   return (
     <div>
       <div className="p-4">
-        <h1 className="text-3xl font-bold truncate">{pageTitle}</h1>
+        <h1 className="text-2xl font-bold truncate">{pageTitle}</h1>
       </div>
       
       <div className="sticky top-0 bg-background z-20 py-2">

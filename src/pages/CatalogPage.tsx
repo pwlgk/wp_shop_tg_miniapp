@@ -4,8 +4,8 @@ import { getCategories } from '@/api/services/catalog.api';
 import type { ProductCategory } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBackButton } from '@/hooks/useBackButton';
-import { useNavigate, Link } from 'react-router-dom';
-import { Search, Grid } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CategoryBannerCard } from '@/components/shared/CategoryBannerCard';
 // import { HomePageHeader } from '@/components/shared/HomePageHeader';
@@ -22,15 +22,15 @@ const CatalogPageSkeleton = () => (
 );
 
 // Карточка "Все товары"
-const AllProductsCard = () => (
-    <Link to="/" className="block group">
-        <div className="relative overflow-hidden rounded-2xl p-4 h-full bg-muted/50 hover:bg-muted transition-colors flex flex-col items-center justify-center text-center">
-            <Grid className="h-10 w-10 text-muted-foreground mb-2" />
-            <h3 className="font-semibold text-lg">Посмотреть все товары</h3>
-            <p className="text-sm text-muted-foreground">Перейти в полный каталог</p>
-        </div>
-    </Link>
-);
+// const AllProductsCard = () => (
+//     <Link to="/" className="block group">
+//         <div className="relative overflow-hidden rounded-2xl p-4 h-full bg-muted/50 hover:bg-muted transition-colors flex flex-col items-center justify-center text-center">
+//             <Grid className="h-10 w-10 text-muted-foreground mb-2" />
+//             <h3 className="font-semibold text-lg">Посмотреть все товары</h3>
+//             <p className="text-sm text-muted-foreground">Перейти в полный каталог</p>
+//         </div>
+//     </Link>
+// );
 
 
 export const CatalogPage = () => {
@@ -61,9 +61,9 @@ export const CatalogPage = () => {
             <header className=" z-30 "
                 style={{ paddingTop: 'var(--tg-viewport-header-height)' }}>
                 <div className="p-4 flex justify-between items-center">
-                    <h1 className="text-3xl font-bold">Каталог</h1>
+                    <h1 className="text-2xl font-bold ">Каталог</h1>
                     <Button variant="ghost" size="icon" onClick={() => navigate('/search')}>
-                        <Search className="h-6 w-6" />
+                        <Search className="h-5 w-5" />
                     </Button>
                 </div>
             </header>
@@ -76,7 +76,7 @@ export const CatalogPage = () => {
                 ))}
 
                 {/* Финальная карточка "Все товары" */}
-                <AllProductsCard />
+                {/* <AllProductsCard /> */}
             </div>
         </div>
     );

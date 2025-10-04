@@ -54,9 +54,6 @@ export type FeedItem = ProductItem | StoryItem;
 /**
  * Вставляет элементы одного массива (stories) в другой (products)
  * с заданной периодичностью.
- * @param products - Массив товаров
- * @param stories - Массив сторис/баннеров
- * @param every - Как часто вставлять баннер (например, 4 - после каждого 4-го товара)
  */
 export const interleaveArrays = (products: Product[], stories: Story[], every: number): FeedItem[] => {
     const mixedFeed: FeedItem[] = [];
@@ -64,10 +61,9 @@ export const interleaveArrays = (products: Product[], stories: Story[], every: n
 
     products.forEach((product, index) => {
         mixedFeed.push({ type: 'product', data: product });
-        // Проверяем, пора ли вставлять баннер
         if ((index + 1) % every === 0 && storyIndex < stories.length) {
             mixedFeed.push({ type: 'story', data: stories[storyIndex] });
-            storyIndex++; // Переходим к следующему баннеру
+            storyIndex++;
         }
     });
 

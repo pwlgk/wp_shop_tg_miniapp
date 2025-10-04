@@ -16,8 +16,8 @@ export const CartPage = () => {
   useBackButton();
   const navigate = useNavigate();
 
-  const { cart, isLoading: isCartLoading, isError: isCartError, removeItem, updateItem, isRemoving, isUpdating, setPointsToSpend, pointsToSpend, setAppliedCouponCode, appliedCouponCode } = useCart();
-  
+const { cart, isLoading: isCartLoading, isError: isCartError, removeItem, updateQuantity, isUpdating, setPointsToSpend, pointsToSpend, setAppliedCouponCode, appliedCouponCode } = useCart();
+
   const { data: dashboardData, isLoading: isDashboardLoading } = useQuery({ 
       queryKey: ['dashboard'], 
       queryFn: getDashboard 
@@ -77,7 +77,7 @@ export const CartPage = () => {
   return (
     <div className="pb-32">
       <div className="p-4 ">
-        <h1 className="text-3xl font-bold">Корзина</h1>
+        <h1 className="text-2xl font-bold mb-4">Корзина</h1>
       </div>
 
       <div className="divide-y p-4">
@@ -86,8 +86,10 @@ export const CartPage = () => {
             key={item.product.id} 
             item={item} 
             onRemove={() => removeItem(item.product.id)}
-            onUpdate={(quantity) => updateItem({ productId: item.product.id, quantity })}
-            isUpdating={isRemoving || isUpdating}
+            // --- ИСПРАВЛЕНИЕ 2: Используем `updateQuantity` ---
+            onUpdate={(quantity) => updateQuantity(item.product.id, quantity)}
+            // --- ИСПРАВЛЕНИЕ 3: Используем единый флаг `isUpdating` ---
+            isUpdating={isUpdating}
           />
         ))}
       </div>

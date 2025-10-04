@@ -136,7 +136,7 @@ export const LoyaltyHistoryPage = () => {
         <div className="p-4">
             <h1 className="text-2xl font-bold">История баллов</h1>
             <div className="flex items-baseline gap-2 mt-1 mb-6">
-                <span className="text-3xl font-bold text-primary">{history.balance}</span>
+                <span className="text-2xl font-bold text-primary">{history.balance}</span>
                 <span className="text-xl text-muted-foreground">баллов</span>
             </div>
 

@@ -21,7 +21,7 @@ interface GetProductsParams {
 
 export const getProducts = async ({
   page = 1,
-  size = 11,
+  size = 10,
   category,
   orderby,
   order,

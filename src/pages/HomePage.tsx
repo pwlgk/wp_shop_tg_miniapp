@@ -1,22 +1,20 @@
 // src/pages/HomePage.tsx
-import { useEffect, useState, useMemo } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { getCategories, getProducts } from '@/api/services/catalog.api';
-import { getStories } from '@/api/services/stories.api'; // Убедитесь, что этот файл существует и экспортирует getStories
 import { ProductCard } from '@/components/shared/ProductCard';
 import { ProductCardSkeleton } from '@/components/shared/ProductCardSkeleton';
 import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
+import { BannersCarousel } from '@/components/shared/BannersCarousel';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ListFilter } from 'lucide-react';
-import type { PaginatedProducts, ProductCategory, Product, Story } from '@/types';
+import type { PaginatedProducts, ProductCategory } from '@/types';
 import { useSearchParams } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HomePageHeader } from '@/components/shared/HomePageHeader';
 import type { InfiniteData } from '@tanstack/react-query';
-import { interleaveArrays, type FeedItem } from '@/lib/utils';
-import { BannerCard } from '@/components/shared/BannerCard';
-import { BannersCarousel } from '@/components/shared/BannersCarousel';
+// УДАЛЕНО: `getStories`, `Story`, `interleaveArrays`, `FeedItem`, `BannerCard`
 
 const sortOptions = {
     popularity: 'Популярные',
@@ -27,29 +25,21 @@ const sortOptions = {
 type SortKey = keyof typeof sortOptions;
 
 export const HomePage = () => {
-
-    
     const [searchParams, setSearchParams] = useSearchParams();
     const categoryIdFromUrl = searchParams.get('category');
-    
+
     const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
         categoryIdFromUrl ? Number(categoryIdFromUrl) : null
     );
     const [sortBy, setSortBy] = useState<SortKey>('popularity');
 
-    // 1. Запрашиваем категории для фильтров
     const { data: categories, isLoading: areCategoriesLoading } = useQuery<ProductCategory[]>({
         queryKey: ['categories'],
         queryFn: getCategories,
     });
-    
-    // 2. Запрашиваем баннеры/сторис для вставки в ленту
-    const { data: stories } = useQuery<Story[]>({
-        queryKey: ['stories'],
-        queryFn: getStories,
-    });
 
-    // 3. Запрашиваем товары с бесконечной загрузкой
+    // УДАЛЕН: Запрос для `stories`
+
     const {
         data: productsData,
         fetchNextPage,
@@ -81,25 +71,22 @@ export const HomePage = () => {
         }
     }, [selectedCategoryId, setSearchParams]);
 
+    // ТЕПЕРЬ ПРОСТО СПИСОК ТОВАРОВ
     const allProducts = productsData?.pages?.flatMap((page) => page.items) ?? [];
     const allCategories = categories?.flatMap(cat => [cat, ...(cat.children ?? [])]) ?? [];
-    
-    // 4. "Смешиваем" товары и баннеры в единую ленту
-    const mixedFeed = useMemo(() => {
-        if (!allProducts.length || !stories?.length) {
-            return allProducts.map(p => ({ type: 'product', data: p })) as FeedItem[];
-        }
-        // Вставляем баннер после каждых 5-х товаров
-        return interleaveArrays(allProducts, stories, 5);
-    }, [allProducts, stories]);
+
+    // УДАЛЕН: `mixedFeed` и `useMemo`
 
     return (
         <div className="relative">
             <HomePageHeader />
             
             <main className="space-y-6 pb-4">
-                <BannersCarousel />
-                {/* Панель фильтров (не липкая) */}
+                {/* Компонент BannersCarousel (бывшие сторис) остается здесь */}
+                <div>
+                    <BannersCarousel />
+                </div>
+
                 <div className="px-4 overflow-x-auto scrollbar-hide">
                     <div className="flex items-center gap-2 whitespace-nowrap">
                         <DropdownMenu>
@@ -137,24 +124,19 @@ export const HomePage = () => {
                     </div>
                 </div>
 
-                {/* Единая "смешанная" лента */}
+                {/* ЛЕНТА ТЕПЕРЬ СОСТОИТ ТОЛЬКО ИЗ ТОВАРОВ */}
                 <div className="px-2 pt-4 grid grid-cols-2 gap-2">
                     {areProductsLoading ? (
                         Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)
                     ) : (
-                        mixedFeed.map((item, index) => {
-                            const key = `${item.type}-${item.data.id}-${index}`;
-                            const isLastElement = index === mixedFeed.length - 1;
-
-                            const content = item.type === 'product'
-                                ? <ProductCard product={item.data as Product} />
-                                : <BannerCard story={item.data as Story} />;
-
-                            if (isLastElement) {
-                                return <div ref={ref} key={key}>{content}</div>;
-                            }
-                            return <div key={key}>{content}</div>;
-                        })
+                        allProducts.map((product, index) => (
+                            <Fragment key={product.id}>
+                                {index === allProducts.length - 1
+                                    ? <div ref={ref}><ProductCard product={product} /></div>
+                                    : <ProductCard product={product} />
+                                }
+                            </Fragment>
+                        ))
                     )}
                 </div>
                 

@@ -108,7 +108,7 @@ export const CheckoutPage = () => {
     return (
         <>
             <div className="p-4 space-y-6 pb-24">
-                <h1 className="text-3xl font-bold">Оформление заказа</h1>
+                <h1 className="text-2xl font-bold">Оформление заказа</h1>
 
                 <Card className="rounded-2xl">
                     <CardHeader className="flex flex-row justify-between items-center">

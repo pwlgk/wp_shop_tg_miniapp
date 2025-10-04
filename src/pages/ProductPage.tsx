@@ -30,8 +30,8 @@ export const ProductPage = () => {
   useBackButton();
 
   const favoriteMutation = useFavorite();
-  const { updateItem, removeItem, isUpdating: isCartUpdating } = useCart();
-  const itemInCart = useCartStore((state) => 
+  const { updateQuantity, isUpdating: isCartUpdating } = useCart();
+    const itemInCart = useCartStore((state) => 
     state.items.find(item => item.product.id === productId)
   );
 
@@ -65,11 +65,7 @@ export const ProductPage = () => {
   
   const handleUpdateQuantity = (newQuantity: number) => {
     if (!product) return;
-    if (newQuantity > 0) {
-        updateItem({ productId: product.id, quantity: newQuantity });
-    } else {
-        removeItem(product.id);
-    }
+    updateQuantity(product.id, newQuantity);
   };
 
  const handleShare = () => {

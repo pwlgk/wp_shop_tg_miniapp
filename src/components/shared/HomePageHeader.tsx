@@ -12,10 +12,10 @@ export const HomePageHeader = () => {
 
     return (
         <header 
-            className="mx-3 my-2 bg-background/80 backdrop-blur-sm z-30 rounded-3xl"
+            className="mx-2 my-2 bg-background/80 backdrop-blur-sm z-30 rounded-3xl"
             style={{ paddingTop: 'var(--tg-viewport-header-height)' }}
         >
-            <div className="py-1 px-1 mb-3 flex items-center gap-2">
+            <div className="py-1  mb-3 flex items-center gap-2">
                 <div className="flex-grow">
                     <SearchInput isLink />
                 </div>

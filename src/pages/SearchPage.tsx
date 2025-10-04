@@ -76,6 +76,8 @@ const Feed = ({ feed, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading 
     );
 };
 
+const isNumeric = (str: string) => /^\d+$/.test(str);
+
 // --- Основной Компонент Страницы Поиска ---
 export const SearchPage = () => {
     useBackButton();
@@ -108,7 +110,23 @@ export const SearchPage = () => {
     // Запрос 4: Результаты поиска
     const searchQuery = useInfiniteQuery({
         queryKey: ['search', debouncedSearchTerm],
-        queryFn: ({ pageParam = 1 }) => getProducts({ page: pageParam, search: debouncedSearchTerm }),
+        queryFn: ({ pageParam = 1 }) => {
+            const trimmedSearch = debouncedSearchTerm.trim();
+            const params: { page: number; search?: string; sku?: string } = {
+                page: pageParam
+            };
+            
+            // Проверяем, является ли запрос числовым
+            if (isNumeric(trimmedSearch)) {
+                // Если да, ищем по артикулу
+                params.sku = trimmedSearch;
+            } else {
+                // Если нет, ищем по тексту
+                params.search = trimmedSearch;
+            }
+            
+            return getProducts(params);
+        },
         getNextPageParam: (lastPage) => lastPage.current_page < lastPage.total_pages ? lastPage.current_page + 1 : undefined,
         initialPageParam: 1,
         enabled: !!debouncedSearchTerm.trim(),
@@ -128,8 +146,8 @@ export const SearchPage = () => {
     return (
         <div>
             {/* ИСПРАВЛЕНИЕ: Добавляем `rounded-b-2xl` к "липкой" шапке */}
-            <header className="sticky top-2 mx-3 bg-background/80 backdrop-blur-sm z-30 rounded-3xl" style={{ paddingTop: 'var(--tg-viewport-header-height)' }}>
-                <div className="py-1 px-1 mb-3">
+            <header className="sticky top-2 mx-2 bg-background/80 backdrop-blur-sm z-30 rounded-3xl" style={{ paddingTop: 'var(--tg-viewport-header-height)' }}>
+                <div className="py-1  mb-3">
                     <SearchInput 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
