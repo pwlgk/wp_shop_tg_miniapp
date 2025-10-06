@@ -201,7 +201,7 @@ export interface LoyaltyHistory {
 }
 
 
-interface HeadingBlock { type: 'h1' | 'h2' | 'h3'; content: string; }
+interface HeadingBlock { type: 'h1' | 'h2' | 'h3' | 'h4'; content: string; }
 interface ParagraphBlock { type: 'p'; content: string; }
 interface ListBlock { type: 'ul' | 'ol'; items: string[]; }
 interface SeparatorBlock { type: 'hr'; }
