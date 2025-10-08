@@ -1,69 +1,137 @@
-# React + TypeScript + Vite
+# Telegram Mini App E-commerce Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![React](https://img.shields.io/badge/React-18-blue?logo=react)
+![Vite](https://img.shields.io/badge/Vite-5-purple?logo=vite)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-cyan?logo=tailwindcss)
+![shadcn/ui](https://img.shields.io/badge/shadcn/ui-black?logo=shadcnui&logoColor=white)
+![TanStack Query](https://img.shields.io/badge/TanStack_Query-v5-orange?logo=react-query)
 
-Currently, two official plugins are available:
+Это фронтенд-часть e-commerce приложения, разработанного как **Telegram Mini App**. Приложение создано с использованием Vite, React, TypeScript и стилизовано с помощью Tailwind CSS и `shadcn/ui`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Проект представляет собой **Backend for Frontend (BFF)** клиент, который взаимодействует с основным бэкендом (на базе FastAPI), предоставляющим API для каталога товаров, управления корзиной, заказами и программой лояльности.
 
-## Expanding the ESLint configuration
+## 🚀 Основные Возможности
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+-   **Аутентификация через Telegram:** Беспарольный и безопасный вход с использованием `initData`.
+-   **Динамический каталог:** Бесконечная лента товаров на главной странице и страницах категорий.
+-   **Фильтрация и сортировка:** Удобные инструменты для навигации по ассортименту.
+-   **Промо-материалы:** Поддержка "сторис" и баннеров, встроенных в ленту.
+-   **Страница товара:** Детальное представление с фото/видео галереей.
+-   **Интерактивная корзина:** Управление количеством, свайп для удаления, применение промокодов и бонусных баллов.
+-   **Оформление заказа:** Упрощенный флоу с созданием заказа для последующей связи с менеджером.
+-   **Личный кабинет:** Просмотр профиля, истории заказов, программы лояльности, реферальной системы и уведомлений.
+-   **Глубокая интеграция с Telegram API:**
+    -   Нативные кнопки "Назад".
+    -   Deep Linking для шаринга товаров (`?startapp=product-ID`).
+    -   Нативные всплывающие окна и уведомления.
+    -   Безопасная работа с буфером обмена.
+-   **Адаптивный и производительный UI:**
+    -   Единая дизайн-система на базе `shadcn/ui` и `tailwind.config.js`.
+    -   Оптимизация производительности с помощью `React.memo`, `React.lazy` и виртуализации списков.
+    -   Анимации на `framer-motion` с GPU-ускорением.
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ Стек Технологий
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+-   **Фреймворк:** [React 18](https://reactjs.org/)
+-   **Сборщик:** [Vite](https://vitejs.dev/)
+-   **Язык:** [TypeScript](https://www.typescriptlang.org/)
+-   **Стилизация:** [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
+-   **Управление серверным состоянием:** [TanStack Query (React Query) v5](https://tanstack.com/query/latest)
+-   **Управление клиентским состоянием:** [Zustand](https://zustand-demo.pmnd.rs/)
+-   **Роутинг:** [React Router DOM](https://reactrouter.com/)
+-   **Работа с формами:** [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+-   **Анимации:** [Framer Motion](https://www.framer.com/motion/)
+-   **Интеграция с Telegram:** [@tma.js/sdk-react](https://github.com/Telegram-Mini-Apps-Dev/tma.js)
+-   **HTTP-клиент:** [Axios](https://axios-http.com/)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## ⚙️ Установка и Запуск
+
+### Предварительные требования
+
+-   Node.js (рекомендуется версия v18.x или выше)
+-   npm
+
+### Настройка окружения
+
+1.  Создайте файл `.env.local` в корневой папке проекта.
+2.  Заполните его необходимыми переменными:
+
+    ```.env
+    # URL вашего бэкенд API
+    VITE_API_URL=https://api.app.ttfg.ru/api/v1
+
+    # Username вашего Telegram-бота (без @)
+    VITE_TELEGRAM_BOT_USERNAME=your_bot_username_here
+
+    # Версия приложения для отображения в профиле
+    VITE_APP_VERSION=0.1.0
+    ```
+
+### Локальный запуск (с HTTPS)
+
+Для полноценной отладки Telegram Mini Apps требуется HTTPS.
+
+1.  **Установите зависимости:**
+    ```bash
+    npm install
+    ```
+
+2.  **Настройте локальный домен (если еще не сделано):**
+    -   Установите `mkcert`.
+    -   Выполните `mkcert -install`.
+    -   В корне проекта создайте папку `.certs` и сгенерируйте сертификат: `mkcert -key-file ./.certs/miniapp.local-key.pem -cert-file ./.certs/miniapp.local.pem miniapp.local`.
+    -   Добавьте `127.0.0.1 miniapp.local` в ваш файл `hosts`.
+    -   Убедитесь, что `vite.config.ts` настроен на использование этого домена и сертификатов.
+
+3.  **Запустите сервер для разработки:**
+    ```bash
+    npm run dev
+    ```
+    Приложение будет доступно по адресу `https://miniapp.local:5173` (или другому порту, указанному Vite).
+
+## 📁 Структура Проекта
+
+```
+/src
+├── api/                # Настройка Axios, API-сервисы
+├── components/
+│   ├── providers/      # Глобальные провайдеры (тема и т.д.)
+│   ├── shared/         # Переиспользуемые компоненты (ProductCard, Button, etc.)
+│   └── ui/             # Компоненты, сгенерированные shadcn
+├── hooks/              # Кастомные React-хуки (useCart, useFavorite, etc.)
+├── lib/                # Утилиты (utils.ts, couponValidator.ts)
+├── pages/              # Компоненты-страницы
+├── routes/             # Конфигурация React Router
+├── store/              # Хранилища Zustand (authStore, cartStore)
+└── types/              # Глобальные TypeScript-типы
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📜 Скрипты
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+-   `npm run dev`: Запуск сервера для разработки с hot-reload.
+-   `npm run build`: Сборка оптимизированной production-версии в папку `dist`.
+-   `npm run lint`: Проверка кода с помощью ESLint.
+-   `npm run preview`: Запуск локального сервера для просмотра production-сборки.
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🚀 Развертывание (Deploy)
+
+1.  **Соберите проект:**
+    ```bash
+    npm run build
+    ```
+2.  **Скопируйте содержимое папки `dist`** на ваш сервер (например, в `/var/www/your-domain`).
+3.  **Настройте Nginx** для раздачи статических файлов и обработки SPA-роутинга. Ключевая директива:
+    ```nginx
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    ```
+4.  **Настройте HTTPS** с помощью Certbot (Let's Encrypt). Это **обязательное** требование для Telegram Mini Apps.
+
+## 🐞 Отладка (Easter Egg)
+
+Для быстрой очистки кэша и локальных данных (полезно при тестировании в мобильном клиенте Telegram):
+1.  Перейдите на страницу "Профиль".
+2.  Быстро тапните 10 раз по номеру версии внизу страницы.
+3.  В появившемся нативном окне подтвердите очистку. Приложение будет перезагружено в "чистом" состоянии.
