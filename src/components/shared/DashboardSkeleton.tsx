@@ -4,8 +4,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 export const DashboardSkeleton = () => {
   return (
     <div className="p-4 space-y-4 animate-pulse">
-      <Skeleton className="h-8 w-3/4 mb-4" />
-      <Card>
+      <Skeleton className="h-9 w-3/4 mb-4" />
+      <Card className="rounded-2xl">
         <CardHeader>
           <Skeleton className="h-6 w-1/2" />
           <Skeleton className="h-4 w-1/4 mt-2" />
@@ -14,7 +14,7 @@ export const DashboardSkeleton = () => {
           <Skeleton className="h-8 w-1/3" />
         </CardContent>
       </Card>
-      <Card>
+      <Card className="rounded-2xl">
         <CardHeader>
           <Skeleton className="h-6 w-1/3" />
         </CardHeader>

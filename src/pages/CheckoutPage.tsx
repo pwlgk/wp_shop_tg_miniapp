@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { CheckoutEditProfile } from '@/components/shared/CheckoutEditProfile';
 import { TotalsCard } from '@/components/shared/TotalsCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { AxiosError } from 'axios';
 
 // Компонент для отображения одного поля данных в блоке "Ваши данные"
 const CheckoutProfileField = ({ icon, value }: { icon: React.ReactNode, value: string | null | undefined }) => (
@@ -48,7 +49,7 @@ export const CheckoutPage = () => {
     const [pointsToSpend, setPointsToSpend] = useState(initialPoints || 0);
     const [isEditSheetOpen, setEditSheetOpen] = useState(false);
 
-    const createOrderMutation = useMutation({
+        const createOrderMutation = useMutation({
         mutationFn: (orderData: OrderCreate) => createOrder(orderData),
         onSuccess: (newOrder) => {
             toast.success(`Заказ №${newOrder.number} успешно создан!`);
@@ -57,8 +58,26 @@ export const CheckoutPage = () => {
             queryClient.invalidateQueries({ queryKey: ['orders'] });
             navigate(`/order-success/${newOrder.id}`, { replace: true, state: { order: newOrder } });
         },
-        onError: (error: any) => {
-            toast.error("Не удалось создать заказ", { description: error.response?.data?.detail || "Пожалуйста, попробуйте еще раз." });
+        onError: (error: AxiosError<{ detail: string }>) => {
+            // Проверяем, является ли это ошибкой "Конфликт" (товара нет в наличии)
+            if (error.response?.status === 409) {
+                toast.warning("Состав корзины изменился", {
+                    description: "Некоторые товары закончились. Пожалуйста, проверьте вашу корзину.",
+                    duration: 5000,
+                });
+                
+                // Автоматически инвалидируем кэш, чтобы корзина обновилась
+                queryClient.invalidateQueries({ queryKey: ['cart'] });
+                
+                // Возвращаем пользователя в корзину, чтобы он увидел изменения
+                navigate('/cart', { replace: true });
+
+            } else {
+                // Обрабатываем все остальные ошибки как обычно
+                toast.error("Не удалось создать заказ", {
+                    description: error.response?.data?.detail || "Произошла неизвестная ошибка.",
+                });
+            }
         }
     });
 
@@ -108,7 +127,7 @@ export const CheckoutPage = () => {
     return (
         <>
             <div className="p-4 space-y-6 pb-24">
-                <h1 className="text-2xl font-bold">Оформление заказа</h1>
+                <h1 className="text-3xl font-bold">Оформление заказа</h1>
 
                 <Card className="rounded-2xl">
                     <CardHeader className="flex flex-row justify-between items-center">
@@ -156,7 +175,7 @@ export const CheckoutPage = () => {
             
             <footer className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
                 <Button 
-                    size="lg" className="w-full h-12 text-base rounded-2xl"
+                    size="lg" className="w-full h-control-md text-base rounded-2xl"
                     onClick={handlePlaceOrder}
                     disabled={createOrderMutation.isPending}
                 >

@@ -113,7 +113,7 @@ export const CheckoutEditProfile = ({ user, open, onOpenChange }: CheckoutEditPr
             type="submit" 
             form="edit-profile-form" // Связываем кнопку с формой
             disabled={updateProfileMutation.isPending} 
-            className="w-full h-12 text-base rounded-2xl"
+            className="w-full h-control-md text-base rounded-2xl"
           >
             {updateProfileMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Сохранить

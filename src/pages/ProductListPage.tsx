@@ -90,17 +90,17 @@ export const ProductListPage = () => {
   return (
     <div>
       <div className="p-4">
-        <h1 className="text-2xl font-bold truncate">{pageTitle}</h1>
+        <h1 className="text-3xl font-bold truncate">{pageTitle}</h1>
       </div>
       
-      <div className="sticky top-0 bg-background z-20 py-2">
+      <div className="sticky top-0 bg-background/80 z-20 py-2">
         <div className="flex items-center gap-2 px-4 overflow-x-auto scrollbar-hide">
-            <div className="flex items-center gap-2">
-                <DropdownMenu>
+            <div className="flex items-center gap-2 ">
+                <DropdownMenu >
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="shrink-0 rounded-2xl"><ListFilter className="h-4 w-4" /></Button>
+                        <Button variant="outline" size="icon" className="shrink-0 rounded-full"><ListFilter className="h-4 w-4" /></Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent>
+                    <DropdownMenuContent className="bg-background">
                         <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => setSortBy(value as SortKey)}>
                             {Object.entries(sortOptions).map(([key, value]) => (
                                 <DropdownMenuRadioItem key={key} value={key}>{value}</DropdownMenuRadioItem>
@@ -108,7 +108,7 @@ export const ProductListPage = () => {
                         </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                <Button variant="outline" size="icon" className="shrink-0 rounded-2xl" onClick={() => navigate('/search')}>
+                <Button variant="outline" size="icon" className="shrink-0 rounded-full" onClick={() => navigate('/search')}>
                     <Search className="h-4 w-4" />
                 </Button>
             </div>
@@ -119,18 +119,18 @@ export const ProductListPage = () => {
                     <Button
                         variant={selectedSubCategoryId === null ? 'default' : 'outline'}
                         onClick={() => setSelectedSubCategoryId(null)}
-                        className="shrink-0 rounded-2xl"
+                        className="shrink-0 rounded-full"
                     >
                         {allButtonText}
                     </Button>
                     {areCategoriesLoading 
-                        ? <Skeleton className="h-10 w-24 rounded-2xl" />
+                        ? <Skeleton className="h-control-sm w-24 rounded-full" />
                         : subCategories.map((category) => (
                             <Button
                                 key={category.id}
                                 variant={selectedSubCategoryId === category.id ? 'default' : 'outline'}
                                 onClick={() => setSelectedSubCategoryId(category.id)}
-                                className="shrink-0 rounded-2xl"
+                                className="shrink-0 rounded-full"
                             >
                                 {category.name}
                             </Button>
@@ -140,7 +140,7 @@ export const ProductListPage = () => {
         </div>
       </div>
       
-      <div className="px-2 pt-4 grid grid-cols-2 gap-2 pb-4">
+      <div className="px-4 pt-4 grid grid-cols-2 gap-3 pb-4">
         {areProductsLoading ? (
             Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
          ) : (
@@ -156,7 +156,7 @@ export const ProductListPage = () => {
       </div>
       
       {isFetchingNextPage && (
-        <div className="px-4 grid grid-cols-2 gap-4 pb-4">
+        <div className="px-4 grid grid-cols-2 gap-3 pb-4">
             <ProductCardSkeleton /><ProductCardSkeleton />
         </div>
       )}

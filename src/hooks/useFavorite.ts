@@ -49,7 +49,7 @@ export const useFavorite = () => {
     },
 
     // Если мутация провалилась, откатываем изменения
-    onError: (err, variables, context) => {
+    onError: (_err, variables, context) => {
       toast.error("Не удалось изменить избранное");
       if (context?.previousProduct) {
         queryClient.setQueryData(['product', variables.productId], context.previousProduct);

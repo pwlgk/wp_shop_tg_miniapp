@@ -17,7 +17,6 @@ import {
     BoxIcon
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils"; // Убедимся, что cn импортирован, он может понадобиться
 
 // ИСПРАВЛЕНИЕ 1: Регулярное выражение теперь поддерживает многострочность
 // `[\s\S]` означает "любой пробельный или не-пробельный символ", включая переносы строк
@@ -74,7 +73,7 @@ export const ContentRenderer = ({ content }: ContentRendererProps) => {
       if (!attrs.user) return <span dangerouslySetInnerHTML={{ __html: content }} />;
       return (
         <a href={`https://t.me/${attrs.user.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="no-underline">
-          <Button className="w-full h-12 text-base my-2"> <MessageSquare className="mr-2 h-5 w-5" /> {attrs.text || 'Написать в Telegram'} </Button>
+          <Button className="w-full h-control-md text-base my-2 rounded-2xl"> <MessageSquare className="mr-2 h-5 w-5" /> {attrs.text || 'Написать в Telegram'} </Button>
         </a>
       );
       
@@ -82,7 +81,7 @@ export const ContentRenderer = ({ content }: ContentRendererProps) => {
       if (!attrs.number) return <span dangerouslySetInnerHTML={{ __html: content }} />;
       return (
         <a href={`tel:${attrs.number}`} className="no-underline">
-           <Button variant="outline" className="w-full h-12 text-base my-2"> <Phone className="mr-2 h-5 w-5" /> {attrs.text || attrs.number} </Button>
+           <Button variant="outline" className="w-full h-control-md text-base my-2 rounded-2xl"> <Phone className="mr-2 h-5 w-5" /> {attrs.text || attrs.number} </Button>
         </a>
       );
       
@@ -90,7 +89,7 @@ export const ContentRenderer = ({ content }: ContentRendererProps) => {
         if(!attrs.to) return <span dangerouslySetInnerHTML={{ __html: content }} />;
         return (
             <Link to={attrs.to} className="no-underline">
-                <Button variant="secondary" className="w-full h-12 text-base my-2">{attrs.text || 'Перейти'}</Button>
+                <Button variant="secondary" className="w-full h-control-md text-base my-2 rounded-2xl">{attrs.text || 'Перейти'}</Button>
             </Link>
         );
 

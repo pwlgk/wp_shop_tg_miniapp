@@ -1,5 +1,6 @@
 // src/components/shared/PromoNotificationModal.tsx
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"; // Добавляем DialogTitle
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden"; // Импортируем для доступности
 import type { Notification } from "@/types";
 import { PromoStory } from "./PromoStory";
 import { BirthdayStory } from "./BirthdayStory";
@@ -10,27 +11,30 @@ interface PromoNotificationModalProps {
 }
 
 export const PromoNotificationModal = ({ notification, onClose }: PromoNotificationModalProps) => {
-  if (!notification) return null;
-  
   const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) onClose();
+    if (!isOpen) {
+      onClose();
+    }
   };
 
+  if (!notification) {
+    return null;
+  }
+  
   const isBirthday = notification.title.toLowerCase().includes('днем рождения');
 
   return (
-    <Dialog open={!!notification} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 border-none bg-transparent shadow-none w-screen h-screen max-w-full max-h-full">
-        {/* Кнопка "X" остается для универсальности */}
-        {/* <Button 
-          variant="ghost" 
-          size="icon" 
-          className="absolute top-4 right-4 z-50 bg-black/20 hover:bg-black/40 text-white rounded-full" 
-          onClick={onClose}
-        >
-          <X />
-        </Button> */}
+    <Dialog open={true} onOpenChange={handleOpenChange}>
+      <DialogContent
+        // Убрали анимацию отсюда
+        className="p-0 border-none bg-transparent shadow-none w-screen h-screen max-w-full flex items-center justify-center data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+      >
+        {/* Решение проблемы доступности: добавляем скрытый заголовок */}
+        <VisuallyHidden asChild>
+          <DialogTitle>{notification.title}</DialogTitle>
+        </VisuallyHidden>
         
+        {/* Компоненты Story теперь отвечают за собственную анимацию */}
         {isBirthday 
             ? <BirthdayStory notification={notification} onClose={onClose} />
             : <PromoStory notification={notification} onClose={onClose} />

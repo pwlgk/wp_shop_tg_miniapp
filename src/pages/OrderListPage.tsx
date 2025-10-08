@@ -39,8 +39,8 @@ export const OrderListPage = () => {
     if (isLoading) {
         return (
             <div className="p-4 space-y-4">
-                <h1 className="text-2xl font-bold">Мои заказы</h1>
-                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 w-full rounded-xl" />)}
+                <h1 className="text-3xl font-bold">Мои заказы</h1>
+                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}
             </div>
         );
     }
@@ -51,7 +51,7 @@ export const OrderListPage = () => {
 
     return (
         <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">Мои заказы</h1>
+            <h1 className="text-3xl font-bold mb-4">Мои заказы</h1>
             {allOrders.length > 0 ? (
                 <div className="space-y-4">
                     {allOrders.map((order, index) => (
@@ -62,13 +62,13 @@ export const OrderListPage = () => {
                             }
                         </Fragment>
                     ))}
-                    {isFetchingNextPage && <Skeleton className="h-28 w-full rounded-xl" />}
+                    {isFetchingNextPage && <Skeleton className="h-28 w-full rounded-2xl" />}
                 </div>
             ) : (
                 <div className="text-center pt-16">
                     <ShoppingBag className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                     <h2 className="text-2xl font-bold">У вас еще нет заказов</h2>
-                    <Button asChild className="mt-6"><Link to="/">Начать покупки</Link></Button>
+                    <Button asChild className="mt-6 h-control-md rounded-2xl"><Link to="/">Начать покупки</Link></Button>
                 </div>
             )}
         </div>

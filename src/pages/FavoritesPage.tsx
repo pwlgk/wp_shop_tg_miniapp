@@ -44,7 +44,7 @@ export const FavoritesPage = () => {
   if (isLoading) {
     return (
       <div className="p-4">
-        <h1 className="text-2xl font-bold mb-4">Избранное</h1>
+        <h1 className="text-3xl font-bold mb-4">Избранное</h1>
         <div className="grid grid-cols-2 gap-4">
           {Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)}
         </div>
@@ -62,7 +62,7 @@ export const FavoritesPage = () => {
         <Heart className="h-16 w-16 text-muted-foreground mb-4" />
         <h2 className="text-2xl font-bold">В избранном пока пусто</h2>
         <p className="text-muted-foreground mt-2">Нажмите на сердечко у товара, чтобы добавить его сюда.</p>
-        <Button asChild className="mt-6">
+        <Button asChild className="mt-6 h-control-md rounded-2xl">
           <Link to="/">Начать покупки</Link>
         </Button>
       </div>
@@ -71,9 +71,9 @@ export const FavoritesPage = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Избранное</h1>
+      <h1 className="text-3xl font-bold mb-4">Избранное</h1>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         {allFavoriteProducts.map((product, index) => (
           <Fragment key={product.id}>
             {index === allFavoriteProducts.length - 1 ? (
@@ -88,7 +88,7 @@ export const FavoritesPage = () => {
       </div>
 
       {isFetchingNextPage && (
-        <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="grid grid-cols-2 gap-3 mt-4">
           <ProductCardSkeleton />
           <ProductCardSkeleton />
         </div>

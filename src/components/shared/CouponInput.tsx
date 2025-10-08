@@ -22,14 +22,14 @@ export const CouponInput = ({ appliedCouponCode, onApply, onRemove, isLoading }:
 
   if (appliedCouponCode) {
     return (
-      <div className="flex items-center justify-between text-sm h-11 px-3 border rounded-2xl bg-muted/50">
+      <div className="flex items-center justify-between text-sm h-control-sm px-3 border rounded-2xl bg-muted">
         <div className="flex items-center gap-2">
           <Tag className="h-4 w-4 text-green-600" />
           <p>
             Промокод <span className="font-bold">{appliedCouponCode}</span> применен
           </p>
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onRemove}>
+        <Button variant="ghost" size="icon" className="h-control-xs w-control-xs" onClick={onRemove}>
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -41,7 +41,7 @@ export const CouponInput = ({ appliedCouponCode, onApply, onRemove, isLoading }:
       <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
       <Input
         placeholder="Введите промокод"
-        className="w-full h-11 rounded-2xl bg-muted pl-10 pr-12 text-base"
+        className="w-full h-control-sm rounded-2xl bg-muted pl-10 pr-12 text-base"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value.toUpperCase())}
         onKeyDown={(e) => e.key === 'Enter' && handleApply()}

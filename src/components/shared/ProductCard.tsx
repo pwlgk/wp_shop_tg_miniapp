@@ -47,21 +47,21 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
     return (
         <Link to={`/product/${product.id}`} className="block group">
-            <div className="relative bg-background border rounded-3xl overflow-visible transition-shadow hover:shadow-md h-full flex flex-col">
+            <div className="relative bg-background border rounded-2xl overflow-visible transition-shadow hover:shadow-md h-full flex flex-col">
                 
                 {/* --- БЛОК С КАРУСЕЛЬЮ ИЗОБРАЖЕНИЙ --- */}
-                <div className="relative overflow-hidden rounded-t-lg">
+                <div className="relative overflow-hidden rounded-2xl">
                     <Carousel setApi={setApi} opts={{ loop: product.images.length > 1 }} className="w-full">
                         <CarouselContent>
                             {product.images.length > 0 ? (
                                 product.images.map(image => (
                                     <CarouselItem key={image.id}>
-                                        <img src={image.src} alt={image.alt || product.name} className="aspect-[4/5] rounded-3xl w-full object-cover" loading="lazy"/>
+                                        <img src={image.src} alt={image.alt || product.name} className="aspect-[4/5] rounded-t-2xl w-full object-cover" loading="lazy"/>
                                     </CarouselItem>
                                 ))
                             ) : (
                                 <CarouselItem>
-                                    <div className="aspect-[4/5] w-full bg-muted flex items-center justify-center">
+                                    <div className="aspect-[4/5] w-full bg-muted flex items-center justify-center rounded-t-2xl">
                                         <span className="text-sm text-muted-foreground">Нет фото</span>
                                     </div>
                                 </CarouselItem>
@@ -78,7 +78,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="absolute top-2 right-2 h-9 w-9 text-black/80 hover:bg-transparent"
+                        className="absolute top-2 right-2 h-control-xs w-control-xs rounded-full text-black/80 hover:bg-transparent"
                         onClick={handleFavoriteClick}
                         disabled={favoriteMutation.isPending}
                     >
@@ -106,7 +106,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                                 <span className="text-sm text-muted-foreground line-through">{parseFloat(product.regular_price).toFixed(0)} ₽</span>
                             )}
                         </div>
-                        <p className="text-sm text-muted-foreground leading-snug mt-1 line-clamp-2 h-14">
+                        <p className="text-sm text-muted-foreground leading-snug mt-1 line-clamp-2 h-10">
                             {product.name}
                         </p>
                     </div>
@@ -115,7 +115,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                 {/* --- КНОПКА "В КОРЗИНУ" НА СТЫКЕ --- */}
                 {/* <Button
                     size="icon"
-                    className="absolute bottom-[4.5rem] right-3 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg transform translate-y-1/2 transition-transform group-hover:scale-110"
+                    className="absolute bottom-[4.5rem] right-3 h-control-md w-control-md rounded-full bg-primary text-primary-foreground shadow-lg transform translate-y-1/2 transition-transform group-hover:scale-110"
                     disabled={product.stock_status !== 'instock' || isUpdating}
                     onClick={handleCartClick}
                 >

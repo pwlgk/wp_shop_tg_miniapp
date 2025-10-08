@@ -19,11 +19,13 @@ const ProfileField = ({ icon, label, value }: { icon: React.ReactNode, label: st
 
 const ProfileDetailsSkeleton = () => (
     <div className="p-4 space-y-4 animate-pulse">
-        <Skeleton className="h-8 w-1/2 mb-4" />
+        <Skeleton className="h-9 w-1/2 mb-4" />
         <Skeleton className="h-12 w-full" />
         <Skeleton className="h-12 w-full" />
         <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full mt-8" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-control-md w-full mt-8 rounded-2xl" />
     </div>
 );
 
@@ -39,7 +41,7 @@ export const ProfileDetailsPage = () => {
 
     return (
         <div className="p-4">
-            <h1 className="text-2xl font-bold mb-6">Мои данные</h1>
+            <h1 className="text-3xl font-bold mb-6">Мои данные</h1>
 
             <div className="space-y-2">
                 <ProfileField icon={<User />} label="ФИО" value={fullName} />
@@ -49,8 +51,7 @@ export const ProfileDetailsPage = () => {
                 <ProfileField icon={<Calendar />} label="Дата рождения" value={user.birth_date} />
             </div>
 
-            <Button asChild size="lg" className="w-full h-12 text-base rounded-2xl"
-            >
+            <Button asChild size="lg" className="w-full mt-8 h-control-md text-base rounded-2xl">
                 <Link to="/profile/edit">Изменить данные</Link>
             </Button>
         </div>

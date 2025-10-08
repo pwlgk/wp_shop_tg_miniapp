@@ -30,9 +30,9 @@ const getStatusInfo = (status: string): { text: string; className: string } => {
 const OrderItemRow = ({ item }: { item: OrderLineItem }) => (
     <Link 
       to={`/product/${item.product_id}`} 
-      className="flex gap-4 py-3 items-center hover:bg-muted/50 px-4 rounded-3xl transition-colors"
+      className="flex gap-4 py-3 items-center hover:bg-muted/50 px-4 rounded-2xl transition-colors"
     >
-        <img src={item.image_url || '/placeholder.png'} alt={item.name} className="h-16 w-16 rounded-md border object-cover shrink-0" />
+        <img src={item.image_url || '/placeholder.png'} alt={item.name} className="h-16 w-16 rounded-lg border object-cover shrink-0" />
         
         {/* ИЗМЕНЕНИЕ ЗДЕСЬ: Добавляем flex-grow */}
         <div className="flex-grow">
@@ -52,12 +52,12 @@ const OrderItemRow = ({ item }: { item: OrderLineItem }) => (
 const OrderDetailSkeleton = () => (
     <div className="p-4 space-y-6 animate-pulse">
         <div className="space-y-1">
-            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-9 w-3/4" />
             <Skeleton className="h-4 w-1/2" />
         </div>
         <Skeleton className="h-8 w-28 rounded-md" />
         <div className="border-t pt-4 space-y-4">
-            <Skeleton className="h-6 w-1/3" />
+            <Skeleton className="h-8 w-1/3" />
             <Skeleton className="h-20 w-full" />
             <Skeleton className="h-20 w-full" />
         </div>
@@ -109,7 +109,7 @@ export const OrderDetailPage = () => {
 
         <div className="p-4 space-y-6">
             <div>
-                <h1 className="text-2xl font-bold">Заказ №{order.number}</h1>
+                <h1 className="text-3xl font-bold">Заказ №{order.number}</h1>
                 <p className="text-muted-foreground">
                     от {format(new Date(order.date_created), "d MMMM yyyy, HH:mm", { locale: ru })}
                 </p>
@@ -118,22 +118,22 @@ export const OrderDetailPage = () => {
             <Badge className={cn("text-base", statusInfo.className)}>{statusInfo.text}</Badge>
 
             <div className="border-t pt-4">
-                <h2 className="font-semibold text-lg mb-2">Состав заказа</h2>
+                <h2 className="font-semibold text-2xl mb-2">Состав заказа</h2>
                 <div className="divide-y -mx-4">
                     {order.line_items.map((item, index) => <OrderItemRow key={`${item.product_id}-${index}`} item={item} />)}
                 </div>
             </div>
 
             <div className="border-t pt-4 space-y-2">
-                <h2 className="font-semibold text-lg">Детали</h2>
+                <h2 className="font-semibold text-2xl">Детали</h2>
                 <div className="flex justify-between"><span className="text-muted-foreground">Оплата</span><span>{order.payment_method_title}</span></div>
-                <div className="flex justify-between pt-2 border-t font-bold text-xl"><span>Итого</span><span>{parseFloat(order.total).toFixed(0)} ₽</span></div>
+                <div className="flex justify-between pt-2 border-t font-bold text-lg"><span>Итого</span><span>{parseFloat(order.total).toFixed(0)} ₽</span></div>
             </div>
 
             {order.can_be_cancelled && (
                 <Button 
                     variant="destructive" 
-            className="w-full h-12 text-base rounded-2xl"
+            className="w-full h-control-md text-base rounded-2xl"
                     onClick={() => cancelMutation.mutate()}
                     disabled={cancelMutation.isPending}
                 >

@@ -129,7 +129,7 @@ export const EditProfileSheet = ({ user, open, onOpenChange }: EditProfileSheetP
                 <FormItem>
                   <FormLabel>Имя</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ваше имя" {...field} />
+                    <Input placeholder="Ваше имя" {...field} className="h-control-sm" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -143,10 +143,10 @@ export const EditProfileSheet = ({ user, open, onOpenChange }: EditProfileSheetP
                   <FormLabel>Телефон</FormLabel>
                   <div className="flex gap-2">
                     <FormControl>
-                      <Input placeholder="+7 (999) 999-99-99" {...field} />
+                      <Input placeholder="+7 (999) 999-99-99" {...field} className="h-control-sm" />
                     </FormControl>
                     {webApp?.isVersionAtLeast('6.9') && (
-                       <Button type="button" variant="outline" onClick={handlePhoneRequest}>
+                       <Button type="button" variant="outline" onClick={handlePhoneRequest} className="h-control-sm">
                          Заполнить
                        </Button>
                     )}
@@ -162,14 +162,14 @@ export const EditProfileSheet = ({ user, open, onOpenChange }: EditProfileSheetP
                 <FormItem>
                   <FormLabel>Email (необязательно)</FormLabel>
                   <FormControl>
-                    <Input placeholder="your@email.com" {...field} />
+                    <Input placeholder="your@email.com" {...field} className="h-control-sm" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <SheetFooter>
-              <Button type="submit" disabled={updateProfileMutation.isPending} className="w-full">
+              <Button type="submit" disabled={updateProfileMutation.isPending} className="w-full h-control-md rounded-2xl">
                 {updateProfileMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Сохранить
               </Button>

@@ -6,7 +6,7 @@ import { getProducts, getCategories } from '@/api/services/catalog.api';
 import { getStories } from '@/api/services/stories.api';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useInView } from 'react-intersection-observer';
-import { useNavigate } from 'react-router-dom';
+import { createSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SearchInput } from '@/components/shared/SearchInput';
@@ -19,11 +19,33 @@ import type { ProductCategory, Story, Product } from '@/types';
 // --- Вложенный Компонент для "Таблеток" Категорий ---
 const CategoryPills = ({ categories, isLoading }: { categories: ProductCategory[], isLoading: boolean }) => {
     const navigate = useNavigate();
+     const findParent = (childId: number, allCategories: ProductCategory[]): ProductCategory | undefined => {
+        for (const category of allCategories) {
+            if (category.children?.some(child => child.id === childId)) {
+                return category;
+            }
+        }
+        return undefined;
+    };
     
+    const handleCategoryClick = (category: ProductCategory) => {
+        const parent = findParent(category.id, categories);
+
+        if (parent) {
+            // Если это дочерняя категория, переходим на страницу родителя с query-параметром
+            navigate({
+                pathname: `/catalog/${parent.id}`,
+                search: createSearchParams({ subcategory: String(category.id) }).toString(),
+            });
+        } else {
+            // Если это корневая категория, переходим на ее страницу
+            navigate(`/catalog/${category.id}`);
+        }
+    };
     if (isLoading) {
         return (
             <div className="flex flex-wrap gap-2 px-4">
-                {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-9 w-24 rounded-full" />)}
+                {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-control-sm w-24 rounded-full" />)}
             </div>
         );
     }
@@ -36,8 +58,8 @@ const CategoryPills = ({ categories, isLoading }: { categories: ProductCategory[
                 <Button 
                     key={cat.id} 
                     variant="secondary" 
-                    className="rounded-full" // Делаем таблетки овальными
-                    onClick={() => navigate(`/catalog/${cat.id}`)}
+                    className="rounded-full"
+                    onClick={() => handleCategoryClick(cat)} // Используем новый обработчик
                 >
                     {cat.name}
                 </Button>
@@ -45,7 +67,6 @@ const CategoryPills = ({ categories, isLoading }: { categories: ProductCategory[
         </div>
     );
 };
-
 // --- Вложенный Компонент для Ленты Товаров ---
 const Feed = ({ feed, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading }: any) => {
     const { ref, inView } = useInView();
@@ -146,7 +167,7 @@ export const SearchPage = () => {
     return (
         <div>
             {/* ИСПРАВЛЕНИЕ: Добавляем `rounded-b-2xl` к "липкой" шапке */}
-            <header className="sticky top-2 mx-2 bg-background/80 backdrop-blur-sm z-30 rounded-3xl" style={{ paddingTop: 'var(--tg-viewport-header-height)' }}>
+            <header className="sticky top-2 mx-4 bg-background/80 backdrop-blur-sm z-30 rounded-2xl" style={{ paddingTop: 'var(--tg-viewport-header-height)' }}>
                 <div className="py-1  mb-3">
                     <SearchInput 
                         value={searchTerm}
@@ -160,7 +181,7 @@ export const SearchPage = () => {
             <main className="space-y-6 py-4">
                 {isSearching ? (
                     <div>
-                        <h2 className="text-xl font-bold px-4 mb-4">Результаты поиска</h2>
+                        <h2 className="text-2xl font-bold px-4 mb-4">Результаты поиска</h2>
                         <Feed 
                             feed={searchFeed}
                             fetchNextPage={searchQuery.fetchNextPage}
@@ -171,10 +192,10 @@ export const SearchPage = () => {
                     </div>
                 ) : (
                     <div>
-                        <h2 className="text-xl font-bold px-4 mb-4">Популярные категории</h2>
+                        <h2 className="text-2xl font-bold px-4 mb-4">Популярные категории</h2>
                         <CategoryPills categories={allCategories} isLoading={areCategoriesLoading} />
 
-                        <h2 className="text-xl font-bold px-4 mt-6 mb-4">Рекомендуем для вас</h2>
+                        <h2 className="text-2xl font-bold px-4 mt-6 mb-4">Рекомендуем для вас</h2>
                         <Feed 
                             feed={recommendedFeed}
                             fetchNextPage={recommendedQuery.fetchNextPage}

@@ -17,8 +17,9 @@ import { Badge } from '@/components/ui/badge';
 import { QuantitySelector } from '@/components/shared/QuantitySelector';
 import { ProductPageSkeleton } from '@/components/shared/ProductPageSkeleton';
 import { toast } from 'sonner';
+import { AxiosError } from 'axios'; // <-- Импортируем AxiosError
+import { ProductNotFound } from '@/components/shared/ProductNotFound'; // <-- Импортируем наш новый компонент
 
-// ВАЖНО: Замените на username вашего бота в .env.local
 const MINI_APP_BASE_URL = import.meta.env.VITE_MINI_APP_BASE_URL || 'MINI_APP_BASE_URL';
 
 export const ProductPage = () => {
@@ -30,8 +31,8 @@ export const ProductPage = () => {
   useBackButton();
 
   const favoriteMutation = useFavorite();
-  const { updateQuantity, isUpdating: isCartUpdating } = useCart();
-    const itemInCart = useCartStore((state) => 
+  const { updateQuantity, addToCart, isUpdating: isCartUpdating } = useCart();
+  const itemInCart = useCartStore((state) => 
     state.items.find(item => item.product.id === productId)
   );
 
@@ -39,12 +40,16 @@ export const ProductPage = () => {
   const [currentSlide, setCurrentSlide] = useState(1);
   const [totalSlides, setTotalSlides] = useState(0);
 
-  const { data: product, isLoading, isError, error } = useQuery<Product, Error>({
+  const { data: product, isLoading, isError, error } = useQuery<Product, AxiosError>({ // <-- Указываем AxiosError как тип ошибки
     queryKey: ['product', productId],
     queryFn: () => getProductById(productId),
     enabled: !isNaN(productId) && productId > 0,
+    retry: false, // Отключаем повторные попытки для 404
   });
   
+  // --- НОВАЯ ЛОГИКА ОБРАБОТКИ 404 ---
+  const isNotFoundError = isError && error?.response?.status === 404;
+
   useEffect(() => {
     if (!carouselApi) return;
     setTotalSlides(carouselApi.scrollSnapList().length);
@@ -67,10 +72,14 @@ export const ProductPage = () => {
     if (!product) return;
     updateQuantity(product.id, newQuantity);
   };
-
- const handleShare = () => {
+  
+  const handleAddToCartClick = () => {
     if (!product) return;
+    addToCart(product, 1);
+  };
 
+  const handleShare = () => {
+    if (!product) return;
     const url = `${MINI_APP_BASE_URL}?startapp=product-${product.id}`;
     
     if (webApp?.showPopup) {
@@ -100,9 +109,25 @@ export const ProductPage = () => {
     }
   };
 
+  // --- ОБНОВЛЕННАЯ ЛОГИКА РЕНДЕРИНГА ---
+  if (isLoading) { 
+    return <ProductPageSkeleton />; 
+  }
+  
+  // Если ошибка 404, показываем специальный компонент
+  if (isNotFoundError) {
+    return <ProductNotFound />;
+  }
 
-  if (isLoading) { return <ProductPageSkeleton />; }
-  if (isError || !product) { return ( <div className="p-4 text-center"> <h1 className="text-xl font-bold">Ошибка</h1> <p className="text-muted-foreground">{error?.message || 'Товар не найден'}</p> </div> ); }
+  // Если любая другая ошибка или нет данных
+  if (isError || !product) { 
+    return ( 
+      <div className="p-4 text-center"> 
+        <h1 className="text-3xl font-bold">Произошла ошибка</h1> 
+        <p className="text-muted-foreground mt-2">{error?.message || 'Не удалось загрузить товар'}</p> 
+      </div> 
+    ); 
+  }
 
   const hasDescription = product.description && product.description.replace(/<p>|<\/p>|\s/g, '').length > 0;
   
@@ -110,15 +135,15 @@ export const ProductPage = () => {
     <div className="relative">
       <main className="pb-24">
         <div className="p-4">
-            <div className="relative overflow-hidden rounded-3xl group">
+            <div className="relative overflow-hidden rounded-2xl group">
               <Button 
                 variant="ghost" 
                 size="icon"
                 onClick={handleFavoriteClick}
                 disabled={favoriteMutation.isPending}
                 className={cn(
-                  'absolute top-3 right-3 h-10 w-10 rounded-full z-10 text-black/80 hover:bg-transparent',
-                  product.is_favorite && '!text-red-500' // !text-red-500 для переопределения mix-blend
+                  'absolute top-3 right-3 h-control-sm w-control-sm rounded-full z-10 text-black/80 hover:bg-transparent',
+                  product.is_favorite && '!text-red-500'
                 )}
               >
                 <Heart className={cn("h-6 w-6", product.is_favorite && 'fill-current')} />
@@ -126,7 +151,7 @@ export const ProductPage = () => {
               
               <Button 
                 variant="ghost" size="icon" onClick={handleShare}
-                className="absolute bottom-2  left-3 h-10 w-10 rounded-full z-10 text-black/80 hover:bg-transparent"
+                className="absolute bottom-2 left-3 h-control-sm w-control-sm rounded-full z-10 text-black/80 hover:bg-transparent"
               >
                 <Share2 className="h-5 w-5" />
               </Button>
@@ -136,13 +161,13 @@ export const ProductPage = () => {
                     <CarouselContent>
                         {product.images.map(image => (
                         <CarouselItem key={image.id}>
-                            <img src={image.src} alt={image.alt || product.name} className="w-full rounded-3xl h-auto aspect-square object-cover" />
+                            <img src={image.src} alt={image.alt || product.name} className="w-full rounded-2xl h-auto aspect-square object-cover" loading="lazy" />
                         </CarouselItem>
                         ))}
                     </CarouselContent>
                   </Carousel>
               ) : (
-                  <div className="w-full aspect-square bg-muted flex items-center justify-center rounded-3xl">
+                  <div className="w-full aspect-square bg-muted flex items-center justify-center rounded-2xl">
                     <span className="text-muted-foreground">Нет изображения</span>
                   </div>
               )}
@@ -159,12 +184,12 @@ export const ProductPage = () => {
             ))}
           </div>
 
-          <h1 className="text-2xl font-bold leading-tight break-words">{product.name}</h1>
+          <h1 className="text-3xl font-bold leading-tight break-words">{product.name}</h1>
           
           {product.sku && <p className="text-sm text-muted-foreground">Артикул: {product.sku}</p>}
           
           <div className="flex items-baseline gap-2 pt-2">
-            <span className="text-3xl font-bold text-primary">
+            <span className="text-4xl font-bold text-primary">
               {parseFloat(product.price).toFixed(0)} ₽
             </span>
             {product.on_sale && product.regular_price && (
@@ -176,7 +201,7 @@ export const ProductPage = () => {
           
           {hasDescription && (
             <div className="pt-4 border-t">
-                <h2 className="font-semibold mb-2 text-lg break-words">Описание</h2>
+                <h2 className="font-semibold mb-2 text-2xl break-words">Описание</h2>
                 <div 
                     className="text-foreground/80 prose prose-sm max-w-none prose-p:my-2"
                     dangerouslySetInnerHTML={{ __html: product.description }} 
@@ -196,12 +221,12 @@ export const ProductPage = () => {
                         onIncrement={() => handleUpdateQuantity(itemInCart.quantity + 1)}
                         maxQuantity={product.stock_quantity}
                         isUpdating={isCartUpdating}
-                        className="h-12 rounded-2xl" // <-- Единый стиль
+                        className="h-control-md rounded-2xl"
                     />
                 </div>
                 <Button 
                     size="lg" 
-                    className="flex-grow h-12 text-base rounded-2xl" // <-- Единый стиль
+                    className="flex-grow h-control-md text-base rounded-2xl"
                     onClick={() => navigate('/cart')}
                 >
                     В корзину
@@ -211,9 +236,9 @@ export const ProductPage = () => {
         ) : (
             <Button 
                 size="lg" 
-                className="w-full h-12 text-base rounded-2xl" // <-- Единый стиль
+                className="w-full h-control-md text-base rounded-2xl"
                 disabled={product.stock_status !== 'instock' || isCartUpdating || favoriteMutation.isPending}
-                onClick={() => handleUpdateQuantity(1)}
+                onClick={handleAddToCartClick}
             >
                 <ShoppingBag className="mr-2 h-5 w-5" />
                 {product.stock_status === 'instock' ? 'Добавить в корзину' : 'Нет в наличии'}

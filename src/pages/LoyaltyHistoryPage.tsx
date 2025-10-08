@@ -94,13 +94,13 @@ const TransactionItem = ({ transaction }: { transaction: LoyaltyTransaction }) =
 // --- Скелетон для страницы (без изменений) ---
 const LoyaltyHistorySkeleton = () => (
     <div className="p-4 animate-pulse">
-        <Skeleton className="h-8 w-1/2" />
-        <Skeleton className="h-6 w-1/4 mt-2 mb-6" />
+        <Skeleton className="h-9 w-1/2" />
+        <Skeleton className="h-10 w-1/4 mt-2 mb-6" />
         <div className="space-y-2">
-            <Skeleton className="h-12 w-full rounded-3xl" />
-            <Skeleton className="h-16 w-full rounded-3xl" />
-            <Skeleton className="h-16 w-full rounded-3xl" />
-            <Skeleton className="h-16 w-full rounded-3xl" />
+            <Skeleton className="h-12 w-full rounded-2xl" />
+            <Skeleton className="h-16 w-full rounded-2xl" />
+            <Skeleton className="h-16 w-full rounded-2xl" />
+            <Skeleton className="h-16 w-full rounded-2xl" />
         </div>
     </div>
 );
@@ -134,10 +134,10 @@ export const LoyaltyHistoryPage = () => {
 
     return (
         <div className="p-4">
-            <h1 className="text-2xl font-bold">История баллов</h1>
+            <h1 className="text-3xl font-bold">История баллов</h1>
             <div className="flex items-baseline gap-2 mt-1 mb-6">
-                <span className="text-2xl font-bold text-primary">{history.balance}</span>
-                <span className="text-xl text-muted-foreground">баллов</span>
+                <span className="text-4xl font-bold text-primary">{history.balance}</span>
+                <span className="text-2xl text-muted-foreground">баллов</span>
             </div>
 
             {Object.keys(groupedTransactions || {}).length > 0 ? (
@@ -145,7 +145,7 @@ export const LoyaltyHistoryPage = () => {
                     {Object.entries(groupedTransactions || {}).map(([dateKey, transactions]) => (
                         <Fragment key={dateKey}>
                             <h2 className="font-semibold text-muted-foreground">{formatRelativeDate(dateKey)}</h2>
-                            <div className="divide-y border rounded-3xl px-2">
+                            <div className="divide-y border rounded-2xl px-2">
                                 {transactions.map((tx, index) => <TransactionItem key={`${tx.created_at}-${index}`} transaction={tx} />)}
                             </div>
                         </Fragment>

@@ -12,7 +12,7 @@ export const NotFoundPage = () => {
             <p className="text-muted-foreground mt-2 max-w-sm">
                 К сожалению, страница, которую вы ищете, не существует или была перемещена.
             </p>
-            <Button asChild className="mt-6 h-12 text-base">
+            <Button asChild className="mt-6 h-control-md text-base rounded-2xl">
                 <Link to="/">Вернуться на главную</Link>
             </Button>
         </div>

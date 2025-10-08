@@ -65,9 +65,9 @@ const { cart, isLoading: isCartLoading, isError: isCartError, removeItem, update
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-center p-4">
         <ShoppingCart className="h-16 w-16 text-muted-foreground mb-4" />
-        <h2 className="text-2xl font-bold">Ваша корзина пуста</h2>
+        <h2 className="text-3xl font-bold">Ваша корзина пуста</h2>
         <p className="text-muted-foreground mt-2">Самое время добавить что-нибудь!</p>
-        <Button asChild className="mt-6 rounded-2xl h-12">
+        <Button asChild className="mt-6 rounded-2xl h-control-md">
             <Link to="/">Перейти к покупкам</Link>
         </Button>
       </div>
@@ -76,8 +76,8 @@ const { cart, isLoading: isCartLoading, isError: isCartError, removeItem, update
 
   return (
     <div className="pb-32">
-      <div className="p-4 ">
-        <h1 className="text-2xl font-bold mb-4">Корзина</h1>
+      <div className="p-4 pb-0">
+        <h1 className="text-3xl font-bold">Корзина</h1>
       </div>
 
       <div className="divide-y p-4">
@@ -110,14 +110,14 @@ const { cart, isLoading: isCartLoading, isError: isCartError, removeItem, update
       </div>
       
       {/* --- ОБНОВЛЕННЫЙ МИНИМАЛИСТИЧНЫЙ ФУТЕР --- */}
-            <footer className="fixed bottom-0 left-0 right-0 p-4 bg-background">
+            <footer className="fixed bottom-16 left-0 right-0 p-4 bg-background">
           <div className="flex justify-between items-center mb-2">
             <span className="text-muted-foreground">Итого к оплате</span>
-            <span className="text-2xl font-bold">{finalTotal.toFixed(0)} ₽</span>
+            <span className="text-xl font-bold">{finalTotal.toFixed(0)} ₽</span>
           </div>
           <Button 
             size="lg" 
-            className="w-full h-12 text-base rounded-2xl"
+            className="w-full h-control-md text-base rounded-2xl"
             disabled={!cart.is_min_amount_reached}
             onClick={() => navigate('/checkout', { state: { cart, pointsToSpend, finalTotal } })}
           >

@@ -52,12 +52,13 @@ export const CartItem = ({ item, onRemove, onUpdate, isUpdating }: CartItemProps
             }}
             className="relative bg-background"
         >
-            <Link to={`/product/${item.product.id}`} className="block py-4 hover:bg-muted/50 rounded-3xl">
+            <Link to={`/product/${item.product.id}`} className="block py-4 hover:bg-muted rounded-2xl">
                 <div className="flex items-start gap-4">
                     <img 
                         src={item.product.images[0]?.src || '/placeholder.png'} 
                         alt={item.product.name}
-                        className="w-24 h-24 object-cover rounded-md border"
+                        className="w-24 h-24 object-cover rounded-lg border"
+                        loading="lazy"
                     />
                     <div className="flex-grow flex flex-col justify-between h-24">
                         <div>
@@ -66,9 +67,9 @@ export const CartItem = ({ item, onRemove, onUpdate, isUpdating }: CartItemProps
                         </div>
                         <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center gap-2">
-                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleDecrement} disabled={isUpdating}><Minus className="h-4 w-4" /></Button>
+                                <Button variant="outline" size="icon" className="h-control-xs w-control-xs" onClick={handleDecrement} disabled={isUpdating}><Minus className="h-4 w-4" /></Button>
                                 <span className="font-bold w-8 text-center">{item.quantity}</span>
-                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleIncrement} disabled={isIncrementDisabled}><Plus className="h-4 w-4" /></Button>
+                                <Button variant="outline" size="icon" className="h-control-xs w-control-xs" onClick={handleIncrement} disabled={isIncrementDisabled}><Plus className="h-4 w-4" /></Button>
                             </div>
                             <Button variant="ghost" size="icon" onClick={handleRemove} disabled={isUpdating}><Trash2 className="h-4 w-4 text-muted-foreground" /></Button>
                         </div>

@@ -21,7 +21,7 @@ export const OrderListItem = ({ order }: { order: Order }) => {
     const statusInfo = getStatusInfo(order.status);
 
     return (
-        <Link to={`/orders/${order.id}`} state={{ order }} className="block p-4 border rounded-xl hover:bg-muted/50 transition-colors">
+        <Link to={`/orders/${order.id}`} state={{ order }} className="block p-4 border rounded-2xl hover:bg-muted transition-colors">
             <div className="flex justify-between items-start">
                 <div>
                     <h3 className="font-bold text-lg">Заказ №{order.number}</h3>
@@ -34,12 +34,12 @@ export const OrderListItem = ({ order }: { order: Order }) => {
             <div className="flex justify-between items-end mt-4">
                 <div className="relative flex items-center h-12">
                     {order.line_items.slice(0, 3).map((item, index) => (
-                        <div key={index} className="absolute h-12 w-12 rounded-3xl border-2 border-background bg-muted overflow-hidden" style={{ left: `${index * 24}px`, zIndex: 3 - index }}>
-                            {item.image_url && <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" />}
+                        <div key={index} className="absolute h-12 w-12 rounded-lg border-2 border-background bg-muted overflow-hidden" style={{ left: `${index * 24}px`, zIndex: 3 - index }}>
+                            {item.image_url && <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" loading="lazy" />}
                         </div>
                     ))}
                     {order.line_items.length > 3 && (
-                        <div className="absolute h-12 w-12 rounded-3xl border-2 border-background bg-secondary flex items-center justify-center text-secondary-foreground font-bold" style={{ left: `${3 * 24}px`, zIndex: 0 }}>
+                        <div className="absolute h-12 w-12 rounded-lg border-2 border-background bg-secondary flex items-center justify-center text-secondary-foreground font-bold" style={{ left: `${3 * 24}px`, zIndex: 0 }}>
                             +{order.line_items.length - 3}
                         </div>
                     )}

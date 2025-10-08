@@ -12,10 +12,10 @@ import { toast } from 'sonner';
 const ReferralPageSkeleton = () => (
     <div className="p-4 space-y-6 animate-pulse">
         <div className="text-center space-y-2">
-            <Skeleton className="h-8 w-3/4 mx-auto" />
+            <Skeleton className="h-9 w-3/4 mx-auto" />
             <Skeleton className="h-4 w-full max-w-md mx-auto" />
         </div>
-        <Skeleton className="h-12 w-full rounded-2xl" />
+        <Skeleton className="h-control-md w-full rounded-2xl" />
         <div className="grid grid-cols-3 gap-4">
             <Skeleton className="h-24 w-full rounded-2xl" />
             <Skeleton className="h-24 w-full rounded-2xl" />
@@ -82,7 +82,7 @@ export const ReferralPage = () => {
                     <input 
                         readOnly 
                         value={referralInfo.referral_link}
-                        className="w-full h-12 pr-12 pl-4 rounded-2xl bg-muted border-none text-center font-mono text-sm"
+                        className="w-full h-control-md pr-12 pl-4 rounded-2xl bg-muted border-none text-center font-mono text-sm"
                     />
                     <Button variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2" onClick={handleCopyLink}>
                         <Copy className="h-5 w-5" />
@@ -92,7 +92,7 @@ export const ReferralPage = () => {
             </section>
 
             <section>
-                <h2 className="text-xl font-semibold mb-4 text-center">Ваша статистика</h2>
+                <h2 className="text-2xl font-semibold mb-4 text-center">Ваша статистика</h2>
                 <div className="grid grid-cols-3 gap-1">
                     <StatCard icon={<UserPlus />} value={referralInfo.completed_referrals} label="Друзей с заказом" />
                     <StatCard icon={<UserPlus strokeWidth={1.5} />} value={referralInfo.pending_referrals} label="Ожидают заказа" />
@@ -101,19 +101,19 @@ export const ReferralPage = () => {
             </section>
 
             <section>
-                <h2 className="text-xl font-semibold mb-4 text-center">Как это работает?</h2>
+                <h2 className="text-2xl font-semibold mb-4 text-center">Как это работает?</h2>
                 <div className="space-y-4 text-center">
-                    <div className="p-4 bg-muted/50 rounded-2xl">
+                    <div className="p-4 bg-muted rounded-2xl">
                         <Share2 className="h-8 w-8 text-primary mx-auto mb-2" />
                         <h3 className="font-semibold">1. Поделитесь ссылкой</h3>
                         <p className="text-sm text-muted-foreground">Отправьте вашу персональную ссылку другу любым удобным способом.</p>
                     </div>
-                    <div className="p-4 bg-muted/50 rounded-2xl">
+                    <div className="p-4 bg-muted rounded-2xl">
                         <Gift className="h-8 w-8 text-primary mx-auto mb-2" />
                         <h3 className="font-semibold">2. Друг получает бонус</h3>
                         <p className="text-sm text-muted-foreground">Он регистрируется по ссылке и получает {settings.referral_welcome_bonus} баллов.</p>
                     </div>
-                    <div className="p-4 bg-muted/50 rounded-2xl">
+                    <div className="p-4 bg-muted rounded-2xl">
                         <Sparkles className="h-8 w-8 text-primary mx-auto mb-2" />
                         <h3 className="font-semibold">3. Вы получаете бонус</h3>
                         <p className="text-sm text-muted-foreground">Мы начислим вам {settings.referrer_bonus} баллов после первого заказа друга.</p>

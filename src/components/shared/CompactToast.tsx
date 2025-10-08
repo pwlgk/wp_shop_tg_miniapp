@@ -11,7 +11,7 @@ export const CompactToast = ({ notification, icon, onClick }: CompactToastProps)
   return (
     <div 
       onClick={onClick}
-      className="w-full bg-background border rounded-3xl shadow-lg p-3 flex items-start gap-3 cursor-pointer"
+      className="w-full bg-background border rounded-2xl shadow-lg p-3 flex items-start gap-3 cursor-pointer"
     >
       <div className="mt-1">{icon}</div>
       <div className="flex-grow">

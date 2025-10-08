@@ -29,31 +29,31 @@ export const AppRoutes = () => {
         Все страницы, которым нужен MainLayout (нижнее меню и отступ сверху)
         теперь находятся здесь.
       */}
-      
+
             <Route path="/" element={<MainLayout />}>
                 <Route index element={<HomePage />} />
                 <Route path="catalog" element={<CatalogPage />} />
-                <Route path="catalog/:categoryId" element={<ProductListPage />} /> {/* <-- ПЕРЕНЕСЛИ СЮДА */}
+                <Route path="catalog/:categoryId" element={<ProductListPage />} /> 
                 <Route path="favorites" element={<FavoritesPage />} />
                 <Route path="profile" element={<ProfilePage />} />
-                <Route path="orders" element={<OrderListPage />} />
-                
+            <Route path="cart" element={<CartPage />} />
+
             </Route>
 
             {/* Страницы без MainLayout */}
             <Route path="/search" element={<SearchPage />} />
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/loyalty-history" element={<LoyaltyHistoryPage />} />
-            <Route path="/profile/details" element={<ProfileDetailsPage />} /> {/* <-- НОВЫЙ РОУТ */}
-            <Route path="/profile/edit" element={<EditProfilePage />} /> {/* <-- НОВЫЙ РОУТ */}
+            <Route path="/profile/details" element={<ProfileDetailsPage />} /> 
+            <Route path="/profile/edit" element={<EditProfilePage />} /> 
             <Route path="/page/:slug" element={<ContentPage />} />
             <Route path="/orders/:orderId" element={<OrderDetailPage />} />
             <Route path="*" element={<NotFoundPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
-                        <Route path="cart" element={<CartPage />} />
-            <Route path="/referral" element={<ReferralPage />} /> {/* <-- НОВЫЙ РОУТ */}
+            <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
+            <Route path="/referral" element={<ReferralPage />} /> 
+                <Route path="orders" element={<OrderListPage />} />
 
             <Route path="*" element={<NotFoundPage />} />
         </Routes>

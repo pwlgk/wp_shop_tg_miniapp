@@ -25,13 +25,16 @@ export const ProductCarousel = ({ queryParams }: ProductCarouselProps) => {
   const products = data?.items ?? [];
 
   if (isLoading) {
+    // Скелетон теперь точно имитирует структуру карусели
     return (
-      <div className="px-2 pt-4 grid grid-cols-2 gap-2">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="basis-1/2 md:basis-1/3 shrink-0 px-2">
-            <ProductCardSkeleton />
+      <div className="w-full overflow-hidden px-4">
+          <div className="flex -ml-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="pl-2 basis-1/2 md:basis-1/3 shrink-0">
+                      <ProductCardSkeleton />
+                  </div>
+              ))}
           </div>
-        ))}
       </div>
     );
   }

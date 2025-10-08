@@ -28,7 +28,7 @@ export const CategorySection = ({ category }: CategorySectionProps) => {
             {/* "Таблетки" подкатегорий */}
             {category.children && category.children.length > 0 && (
                 <div className="px-4 overflow-x-auto scrollbar-hide">
-                    <div className="flex gap-2 whitespace-nowrap">
+                    <div className="flex gap-2 whitespace-rap">
                         {category.children.map(subCategory => (
                             <Button
                                 key={subCategory.id}

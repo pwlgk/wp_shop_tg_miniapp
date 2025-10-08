@@ -12,12 +12,12 @@ import { Skeleton } from "@/components/ui/skeleton"; // <-- Импортируе
 const OrderSuccessSkeleton = () => (
     <div className="flex flex-col items-center justify-center h-screen text-center p-6 animate-pulse">
         <Skeleton className="h-22 w-22 rounded-full mb-6" />
-        <Skeleton className="h-8 w-3/4 max-w-sm mb-2" />
+        <Skeleton className="h-9 w-3/4 max-w-sm mb-2" />
         <Skeleton className="h-6 w-1/2 max-w-xs mb-4" />
         <Skeleton className="h-4 w-full max-w-md" />
         <div className="mt-8 w-full max-w-sm space-y-3">
-            <Skeleton className="h-12 w-full rounded-2xl" />
-            <Skeleton className="h-12 w-full rounded-2xl" />
+            <Skeleton className="h-control-md w-full rounded-2xl" />
+            <Skeleton className="h-control-md w-full rounded-2xl" />
         </div>
     </div>
 );
@@ -112,7 +112,7 @@ export const OrderSuccessPage = () => {
                 </svg>
             </motion.div>
 
-            <motion.h1 variants={itemVariants} className="text-2xl font-bold mt-6">
+            <motion.h1 variants={itemVariants} className="text-3xl font-bold mt-6">
                 Спасибо за ваш заказ!
             </motion.h1>
 
@@ -128,11 +128,11 @@ export const OrderSuccessPage = () => {
             </motion.p>
 
             <motion.div variants={itemVariants} className="mt-8 w-full max-w-sm space-y-3">
-                <Button asChild size="lg" className="w-full h-12 text-base rounded-2xl">
+                <Button asChild size="lg" className="w-full h-control-md text-base rounded-2xl">
                     {/* Ссылка теперь всегда будет правильной */}
                     <Link to={`/orders/${orderId}`}>Посмотреть заказ</Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="w-full h-12 text-base rounded-2xl">
+                <Button asChild variant="outline" size="lg" className="w-full h-control-md text-base rounded-2xl">
                     <Link to="/">Вернуться на главную</Link>
                 </Button>
             </motion.div>

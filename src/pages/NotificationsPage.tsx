@@ -51,7 +51,7 @@ export const NotificationsPage = () => {
     return (
         <div>
             <div className="flex justify-between items-center p-4 border-b sticky top-0 bg-background/80 backdrop-blur-sm z-10">
-                <h1 className="text-2xl font-bold">Уведомления</h1>
+                <h1 className="text-3xl font-bold">Уведомления</h1>
                 {hasUnread && (
                     <Button variant="ghost" size="sm" onClick={() => readAllMutation.mutate()} disabled={readAllMutation.isPending}>
                         <CheckCheck className="mr-2 h-4 w-4" /> Прочитать все

@@ -34,7 +34,7 @@ export const LoyaltyCard = ({ dashboardData }: LoyaltyCardProps) => {
   return (
     <Card 
       onClick={handleCardClick} 
-      className="cursor-pointer hover:bg-muted/50 transition-colors rounded-3xl"
+      className="cursor-pointer hover:bg-muted transition-colors rounded-2xl"
     >
       <CardContent className="p-4">
         {/* Верхний блок: Баланс и уровень */}

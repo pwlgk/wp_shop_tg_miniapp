@@ -228,6 +228,9 @@ export interface Notification {
   is_read: boolean;
   action_url: string | null;
   related_entity_id: string | null; // Может быть ID заказа
+  action_text?: string;     // Текст для основной кнопки (например, "К товарам")
+  promo_code?: string;      // Промокод, если он есть
+  duration?: number;        // Длительность показа сторис в секундах
 }
 export interface PaginatedNotifications extends PaginatedResponse {
   items: Notification[];

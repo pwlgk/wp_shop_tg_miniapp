@@ -14,7 +14,7 @@ const BannerSkeleton = () => (
     <div className="px-4">
         {/* Изменяем ratio и скругление и здесь для консистентности */}
         <AspectRatio ratio={16 / 9}>
-            <Skeleton className="w-full h-full rounded-3xl" />
+            <Skeleton className="w-full h-full rounded-2xl" />
         </AspectRatio>
     </div>
 );
@@ -56,7 +56,7 @@ export const BannersCarousel = () => {
   }
 
   return (
-    <div className="px-2">
+    <div className="px-4">
       <Carousel 
         setApi={setApi} 
         opts={{ loop: banners.length > 1 }} 
@@ -69,7 +69,7 @@ export const BannersCarousel = () => {
           {banners.map((banner) => (
             <CarouselItem key={banner.id}>
               <Link to={banner.link_url || '#'}>
-                <div className="overflow-hidden rounded-3xl relative"> {/* Увеличиваем скругление */}
+                <div className="overflow-hidden rounded-2xl relative"> {/* Увеличиваем скругление */}
                   <AspectRatio ratio={16 / 9} className="bg-muted"> {/* Увеличиваем высоту */}
                     {banner.content_type === 'video' ? (
                       <video
@@ -86,6 +86,7 @@ export const BannersCarousel = () => {
                         src={banner.media_url} 
                         alt={banner.title} 
                         className="w-full h-full object-cover"
+                        loading="lazy" // Оптимизация: ленивая загрузка
                       />
                     )}
                   </AspectRatio>

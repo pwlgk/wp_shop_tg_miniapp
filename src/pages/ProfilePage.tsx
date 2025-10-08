@@ -1,15 +1,16 @@
 // src/pages/ProfilePage.tsx
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMe, getDashboard } from '@/api/services/user.api';
 import { getActiveOrders } from '@/api/services/orders.api';
 import { LoyaltyCard } from '@/components/shared/LoyaltyCard';
 import { ActiveOrdersCarousel, OrderHistoryCard, ActiveOrdersCarouselSkeleton } from '@/components/shared/ActiveOrdersCarousel';
 import { EditProfileSheet } from '@/components/shared/EditProfileSheet';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBackButton } from '@/hooks/useBackButton';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, Info, Mail, Shield, Truck, User, Bell, Users } from 'lucide-react';
+import { toast } from 'sonner';
 
 const ProfilePageSkeleton = () => (
     <div className="p-4 space-y-6 animate-pulse">
@@ -36,27 +37,68 @@ const ProfileLink = ({ to, icon, label, hasIndicator = false, onClick }: { to: s
 
 export const ProfilePage = () => {
   useBackButton();
-  const navigate = useNavigate(); // <-- Вызываем хуки до всех условий
+  const navigate = useNavigate();
   const [isEditSheetOpen, setEditSheetOpen] = useState(false);
-
-  // --- ИСПРАВЛЕНИЕ: ВСЕ ХУКИ useQuery ВЫНЕСЕНЫ НАВЕРХ ---
+  
+  const queryClient = useQueryClient();
+  const webApp = (window as any).Telegram?.WebApp;
+  
   const { data: user, isLoading: isUserLoading } = useQuery({ queryKey: ['me'], queryFn: getMe });
   const { data: dashboard, isLoading: isDashboardLoading } = useQuery({ queryKey: ['dashboard'], queryFn: getDashboard });
   const { data: activeOrders, isLoading: isActiveOrdersLoading } = useQuery({ 
       queryKey: ['activeOrders'], 
       queryFn: getActiveOrders,
-      // Запрашиваем активные заказы, только если в дашборде есть флаг
       enabled: !!dashboard?.has_active_orders,
   });
-  
-  const isLoading = isUserLoading || isDashboardLoading;
-  // Мы больше не ждем activeOrders, так как их может и не быть
 
-  // --- УСЛОВНЫЕ БЛОКИ ТЕПЕРЬ ИДУТ ПОСЛЕ ВСЕХ ХУКОВ ---
+  // --- ЛОГИКА ДЛЯ "ПАСХАЛКИ" ---
+  const clickCount = useRef(0);
+  const clickTimer = useRef<NodeJS.Timeout | null>(null);
+  
+  const handleVersionClick = () => {
+      if (clickTimer.current) {
+          clearTimeout(clickTimer.current);
+      }
+
+      clickCount.current += 1;
+
+      if (clickCount.current >= 10) {
+          if (webApp && webApp.showConfirm) {
+              webApp.showConfirm("Очистить все локальные данные и кэш приложения?", (isConfirmed: boolean) => {
+                  if (isConfirmed) {
+                      queryClient.clear();
+                      localStorage.clear();
+                      sessionStorage.clear();
+                      toast.success("Данные очищены!", {
+                          description: "Приложение будет перезагружено.",
+                          duration: 2000,
+                          onAutoClose: () => window.location.reload(),
+                          onDismiss: () => window.location.reload(),
+                      });
+                  }
+              });
+          } else {
+              if (confirm("Очистить все локальные данные?")) {
+                  queryClient.clear();
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  window.location.reload();
+              }
+          }
+          clickCount.current = 0;
+      }
+
+      clickTimer.current = setTimeout(() => {
+          clickCount.current = 0;
+      }, 2000); // 2-секундное окно для кликов
+  };
+  // --- КОНЕЦ ЛОГИКИ "ПАСХАЛКИ" ---
+
+  const isLoading = isUserLoading || isDashboardLoading;
+
   if (isLoading) {
     return <ProfilePageSkeleton />;
   }
-
   if (!user || !dashboard) {
     return <div className="p-4 text-center">Ошибка загрузки профиля</div>;
   }
@@ -66,15 +108,13 @@ export const ProfilePage = () => {
 
   return (
     <div className="p-4 space-y-6">
-      <h1 className="text-2xl font-bold">Здравствуйте, {user.first_name || 'пользователь'}!</h1>
+      <h1 className="text-3xl font-bold">Здравствуйте, {user.first_name || 'пользователь'}!</h1>
       
       <LoyaltyCard dashboardData={dashboard} />
 
-      {/* Показываем скелетон, пока грузятся именно заказы */}
       {isActiveOrdersLoading && <ActiveOrdersCarouselSkeleton />}
       {hasActiveOrders && activeOrders && <ActiveOrdersCarousel orders={activeOrders} />}
       {!dashboard.has_active_orders && <OrderHistoryCard />}
-
 
       <div className="space-y-2 pt-6 border-t">
         <ProfileLink 
@@ -91,9 +131,10 @@ export const ProfilePage = () => {
                 e.preventDefault();
                 navigate('/profile/details');
             }}
+            
         />
-        <ProfileLink to="/referral" icon={<Users className="h-5 w-5 text-primary" />} label="Пригласить друга" />
-        
+                <ProfileLink to="/referral" icon={<Users className="h-5 w-5 text-primary" />} label="Пригласить друга" />
+
         <div className="border-t pt-4 mt-4 space-y-2">
             <ProfileLink to="/page/about" icon={<Info className="h-5 w-5 text-primary" />} label="О магазине" />
             <ProfileLink to="/page/delivery" icon={<Truck className="h-5 w-5 text-primary" />} label="Доставка и оплата" />
@@ -102,6 +143,15 @@ export const ProfilePage = () => {
         </div>
       </div>
       
+      <div className="pt-8 text-center">
+          <p 
+            className="text-xs text-muted-foreground cursor-pointer"
+            onClick={handleVersionClick}
+          >
+              v{import.meta.env.VITE_APP_VERSION} by nidma.project
+          </p>
+      </div>
+
       <EditProfileSheet 
         user={user}
         open={isEditSheetOpen}

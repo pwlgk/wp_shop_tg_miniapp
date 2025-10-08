@@ -1,8 +1,8 @@
 // src/components/shared/TotalsCard.tsx
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent} from "@/components/ui/card";
 import { CouponInput } from "./CouponInput";
-import { PointsToggle } from "./PointsInput";
 import type { CartResponse, UserDashboard } from "@/types";
+import { PointsToggle } from "./PointsInput";
 
 interface TotalsCardProps {
   // Данные
@@ -36,16 +36,16 @@ export const TotalsCard = ({
 }: TotalsCardProps) => {
 
     return (
-        <Card className="rounded-3xl">
-            <CardHeader>
+        <Card className="rounded-2xl">
+            {/* <CardHeader>
                 <CardTitle>Сводка по заказу</CardTitle>
-            </CardHeader>
+            </CardHeader> */}
             <CardContent className="space-y-4">
                 <CouponInput
                     appliedCouponCode={appliedCouponCode}
                     onApply={onApplyCoupon}
                     onRemove={onRemoveCoupon}
-                    isLoading={isCartLoading && !!appliedCouponCode}
+                    isLoading={isCartLoading}
                 />
                 <PointsToggle 
                     maxPointsToSpend={cart.max_points_to_spend ?? 0}

@@ -18,7 +18,7 @@ export const SearchBar = () => {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           placeholder="Найти товары..."
-          className="pl-10 h-12 text-base"
+          className="pl-10 h-control-md text-base rounded-2xl"
           onFocus={handleFocus}
           readOnly
         />

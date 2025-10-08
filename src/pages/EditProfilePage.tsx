@@ -87,7 +87,7 @@ export const EditProfilePage = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-6">Редактирование</h1>
+      <h1 className="text-3xl font-bold mb-6">Редактирование</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
@@ -196,7 +196,7 @@ export const EditProfilePage = () => {
             />
           )}
 
-          <Button type="submit" disabled={updateProfileMutation.isPending} className="w-full h-12 text-base rounded-2xl"
+          <Button type="submit" disabled={updateProfileMutation.isPending} className="w-full h-control-md text-base rounded-2xl"
           >
             {updateProfileMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Сохранить изменения

@@ -41,7 +41,7 @@ export const ErrorPage = ({ statusCode, message }: ErrorPageProps) => {
             <p className="text-muted-foreground mt-2 max-w-sm">
                 {message || details.defaultMessage}
             </p>
-            <Button onClick={handleRefresh} className="mt-6 h-12 text-base">
+            <Button onClick={handleRefresh} className="mt-6 h-control-md text-base rounded-2xl">
                 Обновить страницу
             </Button>
         </div>

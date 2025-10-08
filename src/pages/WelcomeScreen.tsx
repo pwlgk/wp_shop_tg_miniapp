@@ -27,7 +27,7 @@ export const WelcomeScreen = ({ onDismiss }: { onDismiss: () => void }) => {
 
             <div className="mt-8 w-full max-w-sm space-y-3">
                 {/* При клике на "Заполнить", мы тоже вызываем onDismiss */}
-                <Button asChild size="lg" className="w-full h-12 text-base rounded-2xl" onClick={onDismiss}>
+                <Button asChild size="lg" className="w-full h-control-md text-base rounded-2xl" onClick={onDismiss}>
                     <Link to="/profile/edit">
                         <UserCheck className="mr-2 h-5 w-5" />
                         Заполнить профиль
@@ -36,7 +36,7 @@ export const WelcomeScreen = ({ onDismiss }: { onDismiss: () => void }) => {
                 <Button 
                     variant="ghost" 
                     size="lg" 
-                    className="w-full h-12 text-base"
+                    className="w-full h-control-md text-base rounded-2xl"
                     onClick={onDismiss} // Вызываем onDismiss при пропуске
                 >
                     Пропустить

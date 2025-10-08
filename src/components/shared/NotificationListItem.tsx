@@ -68,7 +68,7 @@ export const NotificationListItem = ({ notification }: NotificationListItemProps
             // Индикатор непрочитанного
             !notification.is_read ? 'bg-primary/5' : '',
             // Эффект при наведении, если есть ссылка
-            linkTo ? 'hover:bg-muted/50' : ''
+            linkTo ? 'hover:bg-muted' : ''
         )}>
             {/* Индикатор-точка для непрочитанных */}
             <div className="flex-shrink-0">

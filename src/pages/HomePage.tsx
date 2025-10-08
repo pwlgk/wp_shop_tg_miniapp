@@ -91,9 +91,9 @@ export const HomePage = () => {
                     <div className="flex items-center gap-2 whitespace-nowrap">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="icon" className="shrink-0 rounded-2xl"><ListFilter className="h-4 w-4" /></Button>
+                                <Button variant="outline" size="icon" className="shrink-0 rounded-full"><ListFilter className="h-4 w-4" /></Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent>
+                            <DropdownMenuContent className="bg-background">
                                 <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => setSortBy(value as SortKey)}>
                                     {Object.entries(sortOptions).map(([key, value]) => (
                                         <DropdownMenuRadioItem key={key} value={key}>{value}</DropdownMenuRadioItem>
@@ -105,18 +105,18 @@ export const HomePage = () => {
                         <Button
                             variant={selectedCategoryId === null ? 'default' : 'outline'}
                             onClick={() => setSelectedCategoryId(null)}
-                            className="shrink-0 rounded-3xl"
+                            className="shrink-0 rounded-full"
                         >
                             Все
                         </Button>
                         {areCategoriesLoading 
-                            ? Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-24 rounded-3xl" />)
+                            ? Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-control-sm w-24 rounded-full" />)
                             : allCategories.map((category) => (
                                 <Button
                                     key={category.id}
                                     variant={selectedCategoryId === category.id ? 'default' : 'outline'}
                                     onClick={() => setSelectedCategoryId(category.id)}
-                                    className="shrink-0 rounded-3xl"
+                                    className="shrink-0 rounded-full"
                                 >
                                     {category.name}
                                 </Button>
@@ -125,7 +125,7 @@ export const HomePage = () => {
                 </div>
 
                 {/* ЛЕНТА ТЕПЕРЬ СОСТОИТ ТОЛЬКО ИЗ ТОВАРОВ */}
-                <div className="px-2 pt-4 grid grid-cols-2 gap-2">
+                <div className="px-4 pt-4 grid grid-cols-2 gap-3">
                     {areProductsLoading ? (
                         Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)
                     ) : (
@@ -141,7 +141,7 @@ export const HomePage = () => {
                 </div>
                 
                 {isFetchingNextPage && (
-                    <div className="px-2 pt-4 grid grid-cols-2 gap-2">
+                    <div className="px-4 pt-4 grid grid-cols-2 gap-3">
                         <ProductCardSkeleton /><ProductCardSkeleton />
                     </div>
                 )}

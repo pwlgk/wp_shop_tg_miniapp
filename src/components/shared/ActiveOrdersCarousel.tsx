@@ -10,10 +10,10 @@ import { AspectRatio } from '../ui/aspect-ratio';
 // Скелетон для карусели
 export const ActiveOrdersCarouselSkeleton = () => (
     <div className="animate-pulse">
-        <Skeleton className="h-7 w-1/2 mb-2" />
+        <Skeleton className="h-8 w-1/2 mb-2" />
         <div className="flex gap-3">
-            <Skeleton className="h-40 w-[45%] rounded-xl" />
-            <Skeleton className="h-40 w-[45%] rounded-xl" />
+            <Skeleton className="h-40 w-[45%] rounded-2xl" />
+            <Skeleton className="h-40 w-[45%] rounded-2xl" />
         </div>
     </div>
 );
@@ -34,7 +34,7 @@ const translateStatus = (status: string): string => {
 
 export const ActiveOrdersCarousel = ({ orders }: { orders: Order[] }) => (
   <div>
-    <h2 className="text-lg font-semibold mb-2">Активные заказы</h2>
+    <h2 className="text-2xl font-semibold mb-2">Активные заказы</h2>
     <Carousel opts={{ align: 'start', dragFree: true }} className="w-full">
       <CarouselContent className="-ml-3">
         {orders.map(order => (
@@ -42,7 +42,7 @@ export const ActiveOrdersCarousel = ({ orders }: { orders: Order[] }) => (
           <CarouselItem key={order.id} className="pl-3 basis-[45%]  sm:basis-1/3">
             <Link to={`/orders/${order.id}`} className="block h-full">
                 {/* Используем AspectRatio, чтобы сделать карточку квадратной */}
-                <AspectRatio ratio={1 / 1} className="flex flex-col justify-between p-3 border rounded-3xl hover:bg-muted/50 transition-colors">
+                <AspectRatio ratio={1 / 1} className="flex flex-col justify-between p-3 border rounded-2xl hover:bg-muted transition-colors">
                     <div>
                         <p className="font-bold text-base">Заказ №{order.number}</p>
                         <p className={cn(
@@ -57,7 +57,7 @@ export const ActiveOrdersCarousel = ({ orders }: { orders: Order[] }) => (
                         {order.line_items.slice(0, 3).map((item, index) => (
                         <div 
                             key={index} 
-                            className="absolute h-14 w-14 rounded-2xl border-2 border-background bg-muted overflow-hidden shrink-0"
+                            className="absolute h-14 w-14 rounded-lg border-2 border-background bg-muted overflow-hidden shrink-0"
                             style={{ 
                             left: `${index * 20}px`, // Уменьшаем сдвиг
                             zIndex: 3 - index,
@@ -88,7 +88,7 @@ export const ActiveOrdersCarousel = ({ orders }: { orders: Order[] }) => (
         ))}
         <CarouselItem className="pl-3 basis-[45%] sm:basis-1/3">
            <Link to="/orders" className="block h-full">
-            <AspectRatio ratio={1/1} className="flex flex-col items-center justify-center p-4 border rounded-3xl bg-muted/50 hover:bg-muted text-center transition-colors">
+            <AspectRatio ratio={1/1} className="flex flex-col items-center justify-center p-4 border rounded-2xl bg-muted hover:bg-muted/80 text-center transition-colors">
                 <p className="font-bold text-base">Все заказы</p>
                 <ArrowRight className="h-7 w-7 mt-2 text-muted-foreground"/>
             </AspectRatio>
@@ -100,7 +100,7 @@ export const ActiveOrdersCarousel = ({ orders }: { orders: Order[] }) => (
 );
 
 export const OrderHistoryCard = () => (
-    <Link to="/orders" className="block p-4 border rounded-3xl text-center bg-muted/50 hover:bg-muted">
+    <Link to="/orders" className="block p-4 border rounded-2xl text-center bg-muted hover:bg-muted/80">
         <h2 className="font-semibold">История заказов</h2>
         <p className="text-sm text-muted-foreground">У вас пока нет активных заказов</p>
     </Link>

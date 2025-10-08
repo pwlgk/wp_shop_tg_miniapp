@@ -12,15 +12,15 @@ export const HomePageHeader = () => {
 
     return (
         <header 
-            className="mx-2 my-2 bg-background/80 backdrop-blur-sm z-30 rounded-3xl"
+            className="mx-4 my-2 bg-background/80 backdrop-blur-sm z-30 rounded-2xl"
             style={{ paddingTop: 'var(--tg-viewport-header-height)' }}
         >
-            <div className="py-1  mb-3 flex items-center gap-2">
+            <div className="py-1 mb-3 flex items-center gap-2">
                 <div className="flex-grow">
                     <SearchInput isLink />
                 </div>
                 <div className="shrink-0">
-                    <Button variant="ghost" size="icon" className="relative" onClick={() => navigate('/notifications')}>
+                    <Button variant="ghost" size="icon" className="relative rounded-full" onClick={() => navigate('/notifications')}>
                         <Bell className="h-6 w-6" />
                         {dashboard?.has_unread_notifications && (
                             <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-background" />
