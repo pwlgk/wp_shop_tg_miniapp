@@ -42,15 +42,17 @@ export const ProductListPage = () => {
     queryFn: getCategories,
   });
   
-  // --- НОВАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ КАТЕГОРИЙ И ЗАГОЛОВКОВ ---
+  // --- ОБНОВЛЕННАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ КАТЕГОРИЙ И ЗАГОЛОВКОВ ---
   const parentCategory = allCategories?.find(cat => cat.id === parentCategoryId);
   const selectedSubCategory = parentCategory?.children?.find(cat => cat.id === selectedSubCategoryId);
   const subCategories = parentCategory?.children ?? [];
   
-  // Заголовок страницы - это название выбранной подкатегории или родительской категории
   const pageTitle = selectedSubCategory?.name || parentCategory?.name || 'Каталог';
-  // Текст для кнопки "Все"
-  const allButtonText = `${parentCategory?.name}`;
+  
+  // ИСПРАВЛЕНИЕ 1: Правильный текст для кнопки "Все"
+  const allButtonText = subCategories.length > 0 
+    ? `Все в "${parentCategory?.name}"` 
+    : (parentCategory?.name || 'Все');
   
   const filterCategoryId = selectedSubCategoryId ?? parentCategoryId;
 
@@ -90,57 +92,49 @@ export const ProductListPage = () => {
   return (
     <div>
       <div className="p-4">
-        <h1 className="text-3xl font-bold truncate">{pageTitle}</h1>
+        <h1 className="text-2xl font-bold truncate">{pageTitle}</h1>
       </div>
       
-      <div className="sticky top-0 bg-background/80 z-20 py-2">
+      <div className="sticky top-0 bg-background/80 backdrop-blur-sm z-20 py-2 border-y">
         <div className="flex items-center gap-2 px-4 overflow-x-auto scrollbar-hide">
-            <div className="flex items-center gap-2 ">
-                <DropdownMenu >
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="shrink-0 rounded-full"><ListFilter className="h-4 w-4" /></Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-background">
+            <div className="flex items-center gap-2">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild><Button variant="outline" size="icon" className="shrink-0 rounded-2xl"><ListFilter className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-background/80">
                         <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => setSortBy(value as SortKey)}>
-                            {Object.entries(sortOptions).map(([key, value]) => (
-                                <DropdownMenuRadioItem key={key} value={key}>{value}</DropdownMenuRadioItem>
-                            ))}
+                            {Object.entries(sortOptions).map(([key, value]) => (<DropdownMenuRadioItem key={key} value={key}>{value}</DropdownMenuRadioItem>))}
                         </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                <Button variant="outline" size="icon" className="shrink-0 rounded-full" onClick={() => navigate('/search')}>
-                    <Search className="h-4 w-4" />
-                </Button>
+                <Button variant="outline" size="icon" className="shrink-0 rounded-2xl" onClick={() => navigate('/search')}><Search className="h-4 w-4" /></Button>
             </div>
 
-            {/* Показываем "таблетки" только если есть подкатегории */}
-            {subCategories.length > 0 && (
-                <div className="flex gap-2 whitespace-nowrap">
-                    <Button
-                        variant={selectedSubCategoryId === null ? 'default' : 'outline'}
-                        onClick={() => setSelectedSubCategoryId(null)}
-                        className="shrink-0 rounded-full"
-                    >
-                        {allButtonText}
-                    </Button>
-                    {areCategoriesLoading 
-                        ? <Skeleton className="h-control-sm w-24 rounded-full" />
-                        : subCategories.map((category) => (
-                            <Button
-                                key={category.id}
-                                variant={selectedSubCategoryId === category.id ? 'default' : 'outline'}
-                                onClick={() => setSelectedSubCategoryId(category.id)}
-                                className="shrink-0 rounded-full"
-                            >
-                                {category.name}
-                            </Button>
-                        ))}
-                </div>
-            )}
+            <div className="flex gap-2 whitespace-nowrap">
+                {/* ИСПРАВЛЕНИЕ 2: Определяем активность кнопки "Все" */}
+                <Button
+                    variant={(selectedSubCategoryId === null) ? 'default' : 'outline'}
+                    onClick={() => setSelectedSubCategoryId(null)}
+                    className="shrink-0 rounded-2xl"
+                >
+                    {allButtonText}
+                </Button>
+                {areCategoriesLoading 
+                    ? <Skeleton className="h-control-sm w-24 rounded-2xl" />
+                    : subCategories.map((category) => (
+                        <Button
+                            key={category.id}
+                            variant={selectedSubCategoryId === category.id ? 'default' : 'outline'}
+                            onClick={() => setSelectedSubCategoryId(category.id)}
+                            className="shrink-0 rounded-2xl"
+                        >
+                            {category.name}
+                        </Button>
+                    ))}
+            </div>
         </div>
       </div>
       
-      <div className="px-4 pt-4 grid grid-cols-2 gap-3 pb-4">
+      <div className="px-4 pt-4 grid grid-cols-2 gap-4 pb-4">
         {areProductsLoading ? (
             Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
          ) : (

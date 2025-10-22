@@ -3,10 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { getLoyaltyHistory } from '@/api/services/user.api';
 import { useBackButton } from "@/hooks/useBackButton";
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowDownLeft, ArrowUpRight, Gift, ShoppingCart, Users, Cake, AlertTriangle } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Gift, ShoppingCart, Users, Cake, AlertTriangle, Info } from 'lucide-react';
 import type { LoyaltyHistory, LoyaltyTransaction } from '@/types';
 import { formatRelativeDate } from '@/lib/utils';
 import { Fragment } from 'react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+
 
 // --- ОБНОВЛЕННЫЙ КОМПОНЕНТ ДЛЯ ОДНОЙ ТРАНЗАКЦИИ ---
 const TransactionItem = ({ transaction }: { transaction: LoyaltyTransaction }) => {
@@ -134,10 +137,15 @@ export const LoyaltyHistoryPage = () => {
 
     return (
         <div className="p-4">
-            <h1 className="text-3xl font-bold">История баллов</h1>
-            <div className="flex items-baseline gap-2 mt-1 mb-6">
-                <span className="text-4xl font-bold text-primary">{history.balance}</span>
-                <span className="text-2xl text-muted-foreground">баллов</span>
+            {/* --- ОБНОВЛЕННЫЙ ЗАГОЛОВОК --- */}
+            <div className="flex justify-between items-center mb-1">
+                <h1 className="text-2xl font-bold">История баллов</h1>
+                <Button variant="ghost" size="icon" asChild>
+                    <Link to="/page/loyalty">
+                        <Info className="h-6 w-6" />
+                        <span className="sr-only">О программе лояльности</span>
+                    </Link>
+                </Button>
             </div>
 
             {Object.keys(groupedTransactions || {}).length > 0 ? (

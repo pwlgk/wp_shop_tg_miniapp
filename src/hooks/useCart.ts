@@ -1,18 +1,34 @@
 // src/hooks/useCart.ts
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery, type UseMutateFunction } from '@tanstack/react-query';
 import { getCart, removeCartItem, updateCartItem } from '@/api/services/cart.api';
 import { useCartStore } from '@/store/cartStore';
-import { useEffect, useState } from 'react';
-import type { Product, CartResponse } from '@/types';
+import { useEffect, useState, useRef } from 'react';
+import type { Product, CartResponse, CartItem } from '@/types';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 
-export const useCart = () => {
+export interface UseCartReturnType {
+  cart: CartResponse | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  updateQuantity: (productId: number, quantity: number) => void;
+  removeItem: UseMutateFunction<void, Error, number, { previousCart: CartResponse | undefined }>;
+  addToCart: (product: Product, quantity?: number) => void;
+  isUpdating: boolean;
+  pointsToSpend: number;
+  setPointsToSpend: React.Dispatch<React.SetStateAction<number>>;
+  appliedCouponCode: string | null;
+  setAppliedCouponCode: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+export const useCart = (): UseCartReturnType => {
   const queryClient = useQueryClient();
   const { setCart } = useCartStore();
   
   const [pointsToSpend, setPointsToSpend] = useState(0);
   const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
+  
+  const shownNotificationIds = useRef(new Set<string>());
 
   const { data: cartData, isLoading, isError } = useQuery<CartResponse, Error>({
     queryKey: ['cart', { points: pointsToSpend, coupon: appliedCouponCode }],
@@ -25,31 +41,47 @@ export const useCart = () => {
   useEffect(() => {
     if (cartData) {
       setCart(cartData.items);
+
+      if (cartData.notifications && cartData.notifications.length > 0) {
+        const lastNotification = cartData.notifications[cartData.notifications.length - 1];
+        const notificationId = `${lastNotification.level}-${lastNotification.message}`;
+
+        if (!shownNotificationIds.current.has(notificationId)) {
+          if (lastNotification.level === 'success') {
+            toast.success(lastNotification.message);
+            if (cartData.applied_coupon_code) {
+              setAppliedCouponCode(cartData.applied_coupon_code);
+            }
+          } else if (lastNotification.level === 'error') {
+            toast.error(lastNotification.message);
+            setAppliedCouponCode(null);
+          } else {
+            toast.info(lastNotification.message);
+          }
+          shownNotificationIds.current.add(notificationId);
+        }
+      }
+      
       if (cartData.applied_coupon_code === null && appliedCouponCode !== null) {
         setAppliedCouponCode(null);
       }
     }
-  }, [cartData, setCart, appliedCouponCode]);
-
-  useEffect(() => {
-    const shownMessages = new Set<string>();
-    cartData?.notifications.forEach(notification => {
-        if (!shownMessages.has(notification.message)) {
-            if (notification.level === 'success') toast.success(notification.message);
-            else if (notification.level === 'error') toast.error(notification.message);
-            else if (notification.level === 'info') toast.info(notification.message);
-            else if (notification.level === 'warning') toast.warning(notification.message);
-            shownMessages.add(notification.message);
-        }
-    });
-  }, [cartData?.notifications]);
+  }, [cartData, setCart, appliedCouponCode, setAppliedCouponCode]);
   
+  // --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
   const handleMutationEnd = () => {
-    // onSettled инвалидирует кэши, чтобы синхронизировать
-    // состояние с сервером после оптимистичного обновления.
+    // При любом изменении состава корзины (добавление, удаление, обновление):
+    
+    // 1. Сбрасываем примененные скидки на клиенте.
+    // Это предотвращает рассинхронизацию, когда `cartData` обновляется, а `pointsToSpend` нет.
+    setPointsToSpend(0);
+    setAppliedCouponCode(null);
+    
+    // 2. Инвалидируем кэши, чтобы получить свежие, пересчитанные данные с сервера.
     queryClient.invalidateQueries({ queryKey: ['cart'] });
     queryClient.invalidateQueries({ queryKey: ['dashboard'] });
   };
+  // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
   const updateItemMutation = useMutation({
     mutationFn: ({ productId, quantity }: { productId: number, quantity: number }) => updateCartItem(productId, quantity),
@@ -59,9 +91,14 @@ export const useCart = () => {
         
         queryClient.setQueryData<CartResponse>(['cart'], (oldCart) => {
             if (!oldCart) return undefined;
-            const newItems = oldCart.items.map(item => 
-                item.product.id === productId ? { ...item, quantity } : item
-            );
+            const existingItem = oldCart.items.find(item => item.product.id === productId);
+            let newItems: CartItem[];
+
+            if (existingItem) {
+                newItems = oldCart.items.map(item => item.product.id === productId ? { ...item, quantity } : item);
+            } else {
+                return oldCart; 
+            }
             return { ...oldCart, items: newItems };
         });
 
@@ -108,16 +145,13 @@ export const useCart = () => {
   const addToCart = (product: Product, quantity = 1) => {
     const existingItem = cartData?.items.find((item) => item.product.id === product.id);
     const newQuantity = existingItem ? existingItem.quantity + quantity : quantity;
-    // Для добавления/обновления используем одну и ту же мутацию
     updateItemMutation.mutate({ productId: product.id, quantity: newQuantity });
   };
   
-  // Единая функция для изменения количества из компонентов
   const updateQuantity = (productId: number, quantity: number) => {
     if (quantity > 0) {
       updateItemMutation.mutate({ productId, quantity });
     } else {
-      // Если количество 0 или меньше, удаляем товар
       removeItemMutation.mutate(productId);
     }
   };

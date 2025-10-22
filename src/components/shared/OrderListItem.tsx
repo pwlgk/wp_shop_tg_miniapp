@@ -11,6 +11,7 @@ const getStatusInfo = (status: string): { text: string; className: string } => {
     switch (status) {
         case 'processing': return { text: 'В обработке', className: 'bg-blue-100 text-blue-800' };
         case 'on-hold': return { text: 'На удержании', className: 'bg-amber-100 text-amber-800' };
+        case 'pending': return { text: 'На удержании', className: 'bg-amber-100 text-amber-800' };
         case 'completed': return { text: 'Выполнен', className: 'bg-green-100 text-green-800' };
         case 'cancelled': return { text: 'Отменен', className: 'bg-gray-100 text-gray-800' };
         default: return { text: status, className: 'bg-muted text-muted-foreground' };

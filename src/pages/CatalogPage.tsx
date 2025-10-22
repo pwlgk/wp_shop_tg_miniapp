@@ -61,7 +61,7 @@ export const CatalogPage = () => {
             <header className=" z-30 "
                 style={{ paddingTop: 'var(--tg-viewport-header-height)' }}>
                 <div className="p-4 flex justify-between items-center">
-                    <h1 className="text-3xl font-bold">Каталог</h1>
+                    <h1 className="text-2xl font-bold">Каталог</h1>
                     <Button variant="ghost" size="icon" onClick={() => navigate('/search')}>
                         <Search className="h-5 w-5" />
                     </Button>

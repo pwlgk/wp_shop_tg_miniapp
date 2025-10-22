@@ -11,19 +11,34 @@ import { CartItem } from '@/components/shared/CartItem';
 import { getDashboard } from '@/api/services/user.api';
 import { useBackButton } from '@/hooks/useBackButton';
 import { TotalsCard } from '@/components/shared/TotalsCard';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 export const CartPage = () => {
   useBackButton();
   const navigate = useNavigate();
 
-const { cart, isLoading: isCartLoading, isError: isCartError, removeItem, updateQuantity, isUpdating, setPointsToSpend, pointsToSpend, setAppliedCouponCode, appliedCouponCode } = useCart();
-
+  const { 
+    cart, 
+    isLoading: isCartLoading, 
+    isError: isCartError, 
+    removeItem, 
+    updateQuantity, 
+    isUpdating, 
+    pointsToSpend, 
+    setPointsToSpend, 
+    appliedCouponCode, 
+    setAppliedCouponCode 
+  } = useCart();
+  
   const { data: dashboardData, isLoading: isDashboardLoading } = useQuery({ 
       queryKey: ['dashboard'], 
       queryFn: getDashboard 
   });
   
   const handleApplyCoupon = (code: string) => {
+    setPointsToSpend(0);
     setAppliedCouponCode(code);
   };
   
@@ -35,6 +50,7 @@ const { cart, isLoading: isCartLoading, isError: isCartError, removeItem, update
     if (apply && cart && dashboardData) {
       const pointsToApply = Math.min(cart.max_points_to_spend, dashboardData.balance);
       setPointsToSpend(pointsToApply);
+      setAppliedCouponCode(null);
     } else {
       setPointsToSpend(0);
     }
@@ -51,8 +67,11 @@ const { cart, isLoading: isCartLoading, isError: isCartError, removeItem, update
   if (isLoading) {
     return (
         <div className="p-4">
-          <Skeleton className="h-8 w-1/3 mb-4" />
-          <div className="space-y-4"> <Skeleton className="h-28 w-full rounded-2xl" /> <Skeleton className="h-28 w-full rounded-2xl" /> </div>
+          <Skeleton className="h-9 w-1/3 mb-4" />
+          <div className="space-y-4"> 
+            <Skeleton className="h-28 w-full rounded-2xl" /> 
+            <Skeleton className="h-28 w-full rounded-2xl" /> 
+          </div>
         </div>
     );
   }
@@ -76,9 +95,27 @@ const { cart, isLoading: isCartLoading, isError: isCartError, removeItem, update
 
   return (
     <div className="pb-32">
-      <div className="p-4 pb-0">
-        <h1 className="text-3xl font-bold">Корзина</h1>
+      <div className="p-4 border-b">
+        <h1 className="text-2xl font-bold">Корзина</h1>
       </div>
+      
+      {!cart.is_min_amount_reached && (
+        <div className="p-4">
+            <Alert variant="default" className="rounded-2xl">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Минимальная сумма заказа: {(cart.min_order_amount ?? 0).toFixed(0)} ₽</AlertTitle>
+                <AlertDescription className="mt-2">
+                    <p className="mb-2">
+                        Добавьте товаров еще на <strong>{((cart.min_order_amount ?? 0) - (cart.total_items_price ?? 0)).toFixed(0)} ₽</strong> для оформления.
+                    </p>
+                    <Progress 
+                        value={((cart.total_items_price ?? 0) / (cart.min_order_amount || 1)) * 100} 
+                        className="h-2"
+                    />
+                </AlertDescription>
+            </Alert>
+        </div>
+      )}
 
       <div className="divide-y p-4">
         {cart.items.map((item: CartItemType) => (
@@ -86,40 +123,43 @@ const { cart, isLoading: isCartLoading, isError: isCartError, removeItem, update
             key={item.product.id} 
             item={item} 
             onRemove={() => removeItem(item.product.id)}
-            // --- ИСПРАВЛЕНИЕ 2: Используем `updateQuantity` ---
             onUpdate={(quantity) => updateQuantity(item.product.id, quantity)}
-            // --- ИСПРАВЛЕНИЕ 3: Используем единый флаг `isUpdating` ---
             isUpdating={isUpdating}
           />
         ))}
       </div>
 
-      {/* --- ИСПОЛЬЗУЕМ НАШ НОВЫЙ КОМПОНЕНТ --- */}
       <div className="px-4">
         <TotalsCard
             cart={cart}
             dashboard={dashboardData}
-            appliedCouponCode={cart.applied_coupon_code}
+            appliedCouponCode={appliedCouponCode} // Передаем из useCart
             onApplyCoupon={handleApplyCoupon}
             onRemoveCoupon={handleRemoveCoupon}
             isCartLoading={isCartLoading && !!appliedCouponCode}
-            pointsToSpend={pointsToSpend}
+            pointsToSpend={pointsToSpend} // Передаем из useCart
             onPointsToggle={handlePointsToggle}
             finalTotal={finalTotal}
         />
       </div>
       
-      {/* --- ОБНОВЛЕННЫЙ МИНИМАЛИСТИЧНЫЙ ФУТЕР --- */}
-            <footer className="fixed bottom-16 left-0 right-0 p-4 bg-background">
+      <footer className="fixed bottom-16 left-0 right-0 bg-background/80 backdrop-blur-sm border-t p-4 z-40">
           <div className="flex justify-between items-center mb-2">
             <span className="text-muted-foreground">Итого к оплате</span>
-            <span className="text-xl font-bold">{finalTotal.toFixed(0)} ₽</span>
+            <span className="text-2xl font-bold">{finalTotal.toFixed(0)} ₽</span>
           </div>
           <Button 
             size="lg" 
             className="w-full h-control-md text-base rounded-2xl"
             disabled={!cart.is_min_amount_reached}
-            onClick={() => navigate('/checkout', { state: { cart, pointsToSpend, finalTotal } })}
+            // --- ИСПРАВЛЕНИЕ: Убираем передачу state ---
+            onClick={() => navigate('/checkout', { 
+                state: { 
+                    cart, // Передаем текущий объект корзины
+                    pointsToSpend, // Передаем текущее количество баллов
+                    appliedCouponCode // Передаем текущий код купона
+                } 
+            })}
           >
             К оформлению
           </Button>

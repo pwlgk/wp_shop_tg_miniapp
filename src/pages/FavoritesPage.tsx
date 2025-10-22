@@ -44,7 +44,7 @@ export const FavoritesPage = () => {
   if (isLoading) {
     return (
       <div className="p-4">
-        <h1 className="text-3xl font-bold mb-4">Избранное</h1>
+        <h1 className="text-2xl font-bold mb-4">Избранное</h1>
         <div className="grid grid-cols-2 gap-4">
           {Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)}
         </div>

@@ -72,12 +72,12 @@ export const ContentPage = () => {
                     <img src={page.image_url} alt={page.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                     <div className="absolute bottom-0 left-0 p-4">
-                        <h1 className="text-3xl font-bold text-white shadow-lg">{page.title}</h1>
+                        <h1 className="text-3xl font-bold text-white">{page.title}</h1>
                     </div>
                 </div>
             ) : (
                 <div className="p-4 border-b">
-                    <h1 className="text-3xl font-bold">{page.title}</h1>
+                    <h1 className="text-2xl font-bold">{page.title}</h1>
                 </div>
             )}
 

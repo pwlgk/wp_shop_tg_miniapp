@@ -1,5 +1,5 @@
 // src/pages/HomePage.tsx
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState, useMemo } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { getCategories, getProducts } from '@/api/services/catalog.api';
 import { ProductCard } from '@/components/shared/ProductCard';
@@ -14,7 +14,6 @@ import { useSearchParams } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { HomePageHeader } from '@/components/shared/HomePageHeader';
 import type { InfiniteData } from '@tanstack/react-query';
-// УДАЛЕНО: `getStories`, `Story`, `interleaveArrays`, `FeedItem`, `BannerCard`
 
 const sortOptions = {
     popularity: 'Популярные',
@@ -37,8 +36,6 @@ export const HomePage = () => {
         queryKey: ['categories'],
         queryFn: getCategories,
     });
-
-    // УДАЛЕН: Запрос для `stories`
 
     const {
         data: productsData,
@@ -71,19 +68,32 @@ export const HomePage = () => {
         }
     }, [selectedCategoryId, setSearchParams]);
 
-    // ТЕПЕРЬ ПРОСТО СПИСОК ТОВАРОВ
     const allProducts = productsData?.pages?.flatMap((page) => page.items) ?? [];
-    const allCategories = categories?.flatMap(cat => [cat, ...(cat.children ?? [])]) ?? [];
-
-    // УДАЛЕН: `mixedFeed` и `useMemo`
+    
+    // --- НОВАЯ ЛОГИКА ФОРМИРОВАНИЯ СПИСКА КАТЕГОРИЙ ---
+    const categoryPills = useMemo(() => {
+        if (!categories) return [];
+        
+        const pills: ProductCategory[] = [];
+        categories.forEach(category => {
+            // Если у категории есть дочерние элементы, добавляем только их
+            if (category.children && category.children.length > 0) {
+                pills.push(...category.children);
+            } else {
+                // Если дочерних нет, добавляем саму корневую категорию
+                pills.push(category);
+            }
+        });
+        return pills;
+    }, [categories]);
+    // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
 
     return (
         <div className="relative">
             <HomePageHeader />
             
             <main className="space-y-6 pb-4">
-                {/* Компонент BannersCarousel (бывшие сторис) остается здесь */}
-                <div>
+                <div >
                     <BannersCarousel />
                 </div>
 
@@ -93,7 +103,7 @@ export const HomePage = () => {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" size="icon" className="shrink-0 rounded-full"><ListFilter className="h-4 w-4" /></Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="bg-background">
+                            <DropdownMenuContent className="bg-background/80">
                                 <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => setSortBy(value as SortKey)}>
                                     {Object.entries(sortOptions).map(([key, value]) => (
                                         <DropdownMenuRadioItem key={key} value={key}>{value}</DropdownMenuRadioItem>
@@ -107,11 +117,12 @@ export const HomePage = () => {
                             onClick={() => setSelectedCategoryId(null)}
                             className="shrink-0 rounded-full"
                         >
-                            Все
+                            Все товары
                         </Button>
                         {areCategoriesLoading 
                             ? Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-control-sm w-24 rounded-full" />)
-                            : allCategories.map((category) => (
+                            // Используем новый массив categoryPills для рендеринга
+                            : categoryPills.map((category) => (
                                 <Button
                                     key={category.id}
                                     variant={selectedCategoryId === category.id ? 'default' : 'outline'}
@@ -124,7 +135,6 @@ export const HomePage = () => {
                     </div>
                 </div>
 
-                {/* ЛЕНТА ТЕПЕРЬ СОСТОИТ ТОЛЬКО ИЗ ТОВАРОВ */}
                 <div className="px-4 pt-4 grid grid-cols-2 gap-3">
                     {areProductsLoading ? (
                         Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)

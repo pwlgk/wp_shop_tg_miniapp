@@ -41,7 +41,7 @@ export const ProfileDetailsPage = () => {
 
     return (
         <div className="p-4">
-            <h1 className="text-3xl font-bold mb-6">Мои данные</h1>
+            <h1 className="text-2xl font-bold mb-6">Мои данные</h1>
 
             <div className="space-y-2">
                 <ProfileField icon={<User />} label="ФИО" value={fullName} />

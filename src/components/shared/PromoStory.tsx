@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import type { Notification } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { X, Copy } from "lucide-react";
+import { Copy } from "lucide-react";
 import { motion, useAnimation } from "framer-motion";
 import { toast } from "sonner";
 
@@ -79,9 +79,9 @@ export const PromoStory = ({ notification, onClose }: { notification: Notificati
                     </div>
                     <div className="flex justify-between items-center mt-3">
                         {/* <p className="font-bold text-white text-shadow text-sm">Название Магазина</p> */}
-                        <Button variant="ghost" size="icon" className="h-control-xs w-control-xs rounded-full bg-black/30 hover:bg-black/50 text-white" onClick={onClose}>
+                        {/* <Button variant="ghost" size="icon" className="h-control-xs w-control-xs rounded-full bg-black/30 hover:bg-black/50 text-white" onClick={onClose}>
                             <X className="h-5 w-5" />
-                        </Button>
+                        </Button> */}
                     </div>
                 </div>
 

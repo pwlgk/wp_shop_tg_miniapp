@@ -34,7 +34,7 @@ const translateStatus = (status: string): string => {
 
 export const ActiveOrdersCarousel = ({ orders }: { orders: Order[] }) => (
   <div>
-    <h2 className="text-2xl font-semibold mb-2">Активные заказы</h2>
+    <h2 className="text-xl font-semibold mb-2">Активные заказы</h2>
     <Carousel opts={{ align: 'start', dragFree: true }} className="w-full">
       <CarouselContent className="-ml-3">
         {orders.map(order => (

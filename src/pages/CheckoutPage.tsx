@@ -1,9 +1,10 @@
 // src/pages/CheckoutPage.tsx
 import { useEffect, useState, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate} from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMe, getDashboard } from '@/api/services/user.api';
 import { createOrder } from '@/api/services/orders.api';
+import { getCart } from '@/api/services/cart.api';
 import { useBackButton } from '@/hooks/useBackButton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,9 +15,8 @@ import { toast } from 'sonner';
 import { CheckoutEditProfile } from '@/components/shared/CheckoutEditProfile';
 import { TotalsCard } from '@/components/shared/TotalsCard';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 
-// Компонент для отображения одного поля данных в блоке "Ваши данные"
 const CheckoutProfileField = ({ icon, value }: { icon: React.ReactNode, value: string | null | undefined }) => (
     <div className="flex items-center gap-3 text-sm">
         <div className="text-muted-foreground">{icon}</div>
@@ -39,17 +39,33 @@ export const CheckoutPage = () => {
     const location = useLocation();
     const queryClient = useQueryClient();
 
-    // Получаем данные, переданные со страницы CartPage
-    const { cart: cartData, pointsToSpend: initialPoints } = (location.state || {}) as { cart: CartResponse | undefined, pointsToSpend: number | undefined };
+    const { 
+        cart: initialCartData, 
+        pointsToSpend: initialPoints, 
+        appliedCouponCode: initialCouponCode 
+    } = (location.state || {}) as { 
+        cart?: CartResponse, 
+        pointsToSpend?: number, 
+        appliedCouponCode?: string | null 
+    };
+
+    const [pointsToSpend, setPointsToSpend] = useState(initialPoints || 0);
+    const [appliedCouponCode, setAppliedCouponCode] = useState(initialCouponCode || null);
+
+    const { data: liveCartData, isLoading: isCartLoading } = useQuery({
+        queryKey: ['cart', { points: pointsToSpend, coupon: appliedCouponCode }],
+        queryFn: () => getCart({ pointsToSpend, couponCode: appliedCouponCode ?? undefined }),
+        placeholderData: initialCartData,
+    });
     
-    // Загружаем актуальные данные пользователя и дашборда
+    const cartData = liveCartData || initialCartData;
+
     const { data: user, isLoading: isUserLoading } = useQuery<UserProfile>({ queryKey: ['me'], queryFn: getMe });
     const { data: dashboard, isLoading: isDashboardLoading } = useQuery<UserDashboard>({ queryKey: ['dashboard'], queryFn: getDashboard });
     
-    const [pointsToSpend, setPointsToSpend] = useState(initialPoints || 0);
     const [isEditSheetOpen, setEditSheetOpen] = useState(false);
 
-        const createOrderMutation = useMutation({
+    const createOrderMutation = useMutation({
         mutationFn: (orderData: OrderCreate) => createOrder(orderData),
         onSuccess: (newOrder) => {
             toast.success(`Заказ №${newOrder.number} успешно создан!`);
@@ -59,21 +75,14 @@ export const CheckoutPage = () => {
             navigate(`/order-success/${newOrder.id}`, { replace: true, state: { order: newOrder } });
         },
         onError: (error: AxiosError<{ detail: string }>) => {
-            // Проверяем, является ли это ошибкой "Конфликт" (товара нет в наличии)
             if (error.response?.status === 409) {
                 toast.warning("Состав корзины изменился", {
                     description: "Некоторые товары закончились. Пожалуйста, проверьте вашу корзину.",
                     duration: 5000,
                 });
-                
-                // Автоматически инвалидируем кэш, чтобы корзина обновилась
                 queryClient.invalidateQueries({ queryKey: ['cart'] });
-                
-                // Возвращаем пользователя в корзину, чтобы он увидел изменения
                 navigate('/cart', { replace: true });
-
             } else {
-                // Обрабатываем все остальные ошибки как обычно
                 toast.error("Не удалось создать заказ", {
                     description: error.response?.data?.detail || "Произошла неизвестная ошибка.",
                 });
@@ -82,21 +91,28 @@ export const CheckoutPage = () => {
     });
 
     useEffect(() => {
-        // Если пользователь попал сюда без данных, возвращаем его в корзину
-        if (!cartData) {
+        if (!isCartLoading && (!cartData || cartData.items.length === 0)) {
             navigate('/cart', { replace: true });
         }
-    }, [cartData, navigate]);
+    }, [cartData, isCartLoading, navigate]);
 
-    const handlePointsToggle = (apply: boolean) => {
-      if (apply && cartData && dashboard) {
-        const pointsToApply = Math.min(cartData.max_points_to_spend, dashboard.balance);
-        setPointsToSpend(pointsToApply);
-      } else {
+    const handleApplyCoupon = (code: string) => {
         setPointsToSpend(0);
-      }
+        setAppliedCouponCode(code);
     };
-
+    const handleRemoveCoupon = () => {
+        setAppliedCouponCode(null);
+    };
+    const handlePointsToggle = (apply: boolean) => {
+        if (apply && cartData && dashboard) {
+            const pointsToApply = Math.min(cartData.max_points_to_spend, dashboard.balance);
+            setPointsToSpend(pointsToApply);
+            setAppliedCouponCode(null);
+        } else {
+            setPointsToSpend(0);
+        }
+    };
+    
     const finalTotal = useMemo(() => {
         if (!cartData) return 0;
         const price = (cartData.final_price ?? cartData.total_items_price) - pointsToSpend;
@@ -114,11 +130,11 @@ export const CheckoutPage = () => {
         createOrderMutation.mutate({
             payment_method_id: 'cod',
             points_to_spend: pointsToSpend,
-            coupon_code: cartData?.applied_coupon_code,
+            coupon_code: appliedCouponCode,
         });
     };
 
-    const isLoading = isUserLoading || isDashboardLoading;
+    const isLoading = isUserLoading || isDashboardLoading || (isCartLoading && !initialCartData);
     if (isLoading) return <CheckoutPageSkeleton />;
     if (!cartData || !user || !dashboard) return <div className="p-4 text-center">Ошибка загрузки данных.</div>;
 
@@ -127,14 +143,12 @@ export const CheckoutPage = () => {
     return (
         <>
             <div className="p-4 space-y-6 pb-24">
-                <h1 className="text-3xl font-bold">Оформление заказа</h1>
+                <h1 className="text-2xl font-bold">Оформление заказа</h1>
 
                 <Card className="rounded-2xl">
                     <CardHeader className="flex flex-row justify-between items-center">
                         <CardTitle>Ваши данные</CardTitle>
-                        <Button variant="ghost" size="icon" className="-mr-2" onClick={() => setEditSheetOpen(true)}>
-                            <Edit className="h-4 w-4" />
-                        </Button>
+                        <Button variant="ghost" size="icon" className="-mr-2" onClick={() => setEditSheetOpen(true)}><Edit className="h-4 w-4" /></Button>
                     </CardHeader>
                     <CardContent className="space-y-3">
                         <CheckoutProfileField icon={<User className="h-4 w-4" />} value={`${user.first_name || ''} ${user.last_name || ''}`.trim() || null} />
@@ -161,12 +175,10 @@ export const CheckoutPage = () => {
                 <TotalsCard 
                     cart={cartData}
                     dashboard={dashboard}
-                    // Купон нельзя менять на этой странице, поэтому передаем null/пустые функции
-                    appliedCouponCode={cartData.applied_coupon_code}
-                    onApplyCoupon={() => toast.info("Промокод можно применить только в корзине.")}
-                    onRemoveCoupon={() => toast.info("Промокод можно изменить только в корзине.")}
-                    isCartLoading={false}
-                    // А баллами управлять можно
+                    appliedCouponCode={appliedCouponCode}
+                    onApplyCoupon={handleApplyCoupon}
+                    onRemoveCoupon={handleRemoveCoupon}
+                    isCartLoading={isCartLoading && !!appliedCouponCode}
                     pointsToSpend={pointsToSpend}
                     onPointsToggle={handlePointsToggle}
                     finalTotal={finalTotal}
@@ -184,11 +196,13 @@ export const CheckoutPage = () => {
                 </Button>
             </footer>
 
-            <CheckoutEditProfile
-                user={user}
-                open={isEditSheetOpen}
-                onOpenChange={setEditSheetOpen}
-            />
+            {user && (
+                <CheckoutEditProfile
+                    user={user}
+                    open={isEditSheetOpen}
+                    onOpenChange={setEditSheetOpen}
+                />
+            )}
         </>
     );
 };

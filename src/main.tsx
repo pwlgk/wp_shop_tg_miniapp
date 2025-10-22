@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <SDKProvider>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange> {/*theme system */}
         <BrowserRouter>
         <ScrollToTop />
           <QueryClientProvider client={queryClient}>

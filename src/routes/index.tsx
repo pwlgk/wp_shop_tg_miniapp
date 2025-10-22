@@ -20,6 +20,7 @@ import { NotFoundPage } from '@/pages/NotFoundPage';
 import { CheckoutPage } from '@/pages/CheckoutPage';
 import { OrderSuccessPage } from '@/pages/OrderSuccessPage';
 import { ReferralPage } from '@/pages/ReferralPage';
+import { DeveloperPage } from '@/pages/DeveloperPage';
 
 
 export const AppRoutes = () => {
@@ -33,10 +34,10 @@ export const AppRoutes = () => {
             <Route path="/" element={<MainLayout />}>
                 <Route index element={<HomePage />} />
                 <Route path="catalog" element={<CatalogPage />} />
-                <Route path="catalog/:categoryId" element={<ProductListPage />} /> 
+                <Route path="catalog/:categoryId" element={<ProductListPage />} />
                 <Route path="favorites" element={<FavoritesPage />} />
                 <Route path="profile" element={<ProfilePage />} />
-            <Route path="cart" element={<CartPage />} />
+                <Route path="cart" element={<CartPage />} />
 
             </Route>
 
@@ -44,16 +45,17 @@ export const AppRoutes = () => {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/loyalty-history" element={<LoyaltyHistoryPage />} />
-            <Route path="/profile/details" element={<ProfileDetailsPage />} /> 
-            <Route path="/profile/edit" element={<EditProfilePage />} /> 
+            <Route path="/profile/details" element={<ProfileDetailsPage />} />
+            <Route path="/profile/edit" element={<EditProfilePage />} />
             <Route path="/page/:slug" element={<ContentPage />} />
             <Route path="/orders/:orderId" element={<OrderDetailPage />} />
             <Route path="*" element={<NotFoundPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
-            <Route path="/referral" element={<ReferralPage />} /> 
-                <Route path="orders" element={<OrderListPage />} />
+            <Route path="/referral" element={<ReferralPage />} />
+            <Route path="orders" element={<OrderListPage />} />
+            <Route path="/developer" element={<DeveloperPage />} /> {/* <-- НОВЫЙ РОУТ */}
 
             <Route path="*" element={<NotFoundPage />} />
         </Routes>
