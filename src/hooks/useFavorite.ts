@@ -11,18 +11,15 @@ export const useFavorite = () => {
     mutationFn: ({ productId, isFavorite }: { productId: number; isFavorite: boolean }) =>
       isFavorite ? removeFavorite(productId) : addFavorite(productId),
     
-    // --- НАЧАЛО ЛОГИКИ OPTIMISTIC UPDATE ---
     onMutate: async ({ productId, isFavorite }) => {
-      // 1. Отменяем все текущие запросы, чтобы они не перезаписали наши данные
       await queryClient.cancelQueries({ queryKey: ['products'] });
       await queryClient.cancelQueries({ queryKey: ['product', productId] });
+      await queryClient.cancelQueries({ queryKey: ['favorites'] }); // Также отменяем запросы к списку избранного
 
-      // 2. Сохраняем предыдущее состояние данных для отката в случае ошибки
       const previousProduct = queryClient.getQueryData<Product>(['product', productId]);
       const previousProductsLists = queryClient.getQueriesData<InfiniteData<PaginatedProducts>>({ queryKey: ['products'] });
 
-      // 3. Оптимистично обновляем UI
-      // Обновляем детальную страницу товара
+      // Оптимистично обновляем детальную страницу товара
       if (previousProduct) {
         queryClient.setQueryData<Product>(['product', productId], {
           ...previousProduct,
@@ -30,7 +27,7 @@ export const useFavorite = () => {
         });
       }
 
-      // Обновляем все списки товаров
+      // Оптимистично обновляем все списки товаров
       queryClient.setQueriesData<InfiniteData<PaginatedProducts>>({ queryKey: ['products'] }, (oldData) => {
         if (!oldData) return oldData;
         return {
@@ -44,11 +41,9 @@ export const useFavorite = () => {
         };
       });
 
-      // 4. Возвращаем контекст с сохраненными данными
       return { previousProduct, previousProductsLists };
     },
 
-    // Если мутация провалилась, откатываем изменения
     onError: (_err, variables, context) => {
       toast.error("Не удалось изменить избранное");
       if (context?.previousProduct) {
@@ -61,13 +56,18 @@ export const useFavorite = () => {
       }
     },
     
-    // После завершения запроса (успех или ошибка), инвалидируем кэш для синхронизации
-    onSettled: (_data, _error, variables) => {
+    // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+    // Используем onSuccess для инвалидации, чтобы гарантировать, что сервер уже обновил данные
+    onSuccess: (_data, variables) => {
+      // Инвалидируем кэши, чтобы при следующем заходе на страницу данные были свежими.
+      // Это происходит "в фоне" и не мешает оптимистичному обновлению.
       queryClient.invalidateQueries({ queryKey: ['product', variables.productId] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
+
+    // onSettled больше не нужен для инвалидации, его можно убрать или использовать для других целей
   });
 
   return mutation;

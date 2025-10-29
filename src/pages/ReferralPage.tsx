@@ -71,7 +71,7 @@ export const ReferralPage = () => {
         <div className="p-4 space-y-8">
             <section className="text-center space-y-3">
                 <Gift className="h-16 w-16 text-primary mx-auto" strokeWidth={1.5} />
-                <h1 className="text-3xl font-bold">Дарим баллы вам и друзьям!</h1>
+                <h1 className="text-2xl font-bold">Дарим баллы вам и друзьям!</h1>
                 <p className="text-muted-foreground max-w-md mx-auto">
                     Ваш друг получит <span className="font-bold text-primary">{settings.referral_welcome_bonus}</span> баллов за регистрацию, а вы — <span className="font-bold text-primary">{settings.referrer_bonus}</span> баллов после его первого заказа.
                 </p>
@@ -92,7 +92,7 @@ export const ReferralPage = () => {
             </section>
 
             <section>
-                <h2 className="text-2xl font-semibold mb-4 text-center">Ваша статистика</h2>
+                <h2 className="text-xl font-semibold mb-4 text-center">Ваша статистика</h2>
                 <div className="grid grid-cols-3 gap-1">
                     <StatCard icon={<UserPlus />} value={referralInfo.completed_referrals} label="Друзей с заказом" />
                     <StatCard icon={<UserPlus strokeWidth={1.5} />} value={referralInfo.pending_referrals} label="Ожидают заказа" />
@@ -101,7 +101,7 @@ export const ReferralPage = () => {
             </section>
 
             <section>
-                <h2 className="text-2xl font-semibold mb-4 text-center">Как это работает?</h2>
+                <h2 className="text-xl font-semibold mb-4 text-center">Как это работает?</h2>
                 <div className="space-y-4 text-center">
                     <div className="p-4 bg-muted rounded-2xl">
                         <Share2 className="h-8 w-8 text-primary mx-auto mb-2" />

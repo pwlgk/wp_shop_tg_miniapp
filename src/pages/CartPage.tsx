@@ -4,33 +4,21 @@ import { useCart } from '@/hooks/useCart';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 import type { CartItem as CartItemType } from '@/types';
 import { CartItem } from '@/components/shared/CartItem';
 import { getDashboard } from '@/api/services/user.api';
 import { useBackButton } from '@/hooks/useBackButton';
 import { TotalsCard } from '@/components/shared/TotalsCard';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
 
 export const CartPage = () => {
   useBackButton();
   const navigate = useNavigate();
 
-  const { 
-    cart, 
-    isLoading: isCartLoading, 
-    isError: isCartError, 
-    removeItem, 
-    updateQuantity, 
-    isUpdating, 
-    pointsToSpend, 
-    setPointsToSpend, 
-    appliedCouponCode, 
-    setAppliedCouponCode 
-  } = useCart();
+  const { cart, isLoading: isCartLoading, isError: isCartError, removeItem, updateQuantity, isUpdating, setPointsToSpend, pointsToSpend, setAppliedCouponCode, appliedCouponCode } = useCart();
   
   const { data: dashboardData, isLoading: isDashboardLoading } = useQuery({ 
       queryKey: ['dashboard'], 
@@ -69,8 +57,8 @@ export const CartPage = () => {
         <div className="p-4">
           <Skeleton className="h-9 w-1/3 mb-4" />
           <div className="space-y-4"> 
-            <Skeleton className="h-28 w-full rounded-2xl" /> 
-            <Skeleton className="h-28 w-full rounded-2xl" /> 
+            <Skeleton className="h-32 w-full rounded-2xl" /> 
+            <Skeleton className="h-32 w-full rounded-2xl" /> 
           </div>
         </div>
     );
@@ -94,7 +82,7 @@ export const CartPage = () => {
   }
 
   return (
-    <div className="pb-32">
+    <div className="pb-40"> {/* Отступ снизу для футера */}
       <div className="p-4 border-b">
         <h1 className="text-2xl font-bold">Корзина</h1>
       </div>
@@ -108,24 +96,24 @@ export const CartPage = () => {
                     <p className="mb-2">
                         Добавьте товаров еще на <strong>{((cart.min_order_amount ?? 0) - (cart.total_items_price ?? 0)).toFixed(0)} ₽</strong> для оформления.
                     </p>
-                    <Progress 
-                        value={((cart.total_items_price ?? 0) / (cart.min_order_amount || 1)) * 100} 
-                        className="h-2"
-                    />
+                    <Progress value={((cart.total_items_price ?? 0) / (cart.min_order_amount || 1)) * 100} className="h-2" />
                 </AlertDescription>
             </Alert>
         </div>
       )}
 
-      <div className="divide-y p-4">
+      {/* --- ИСПРАВЛЕНИЕ ЗДЕСЬ --- */}
+      <div className="space-y-4 p-4">
         {cart.items.map((item: CartItemType) => (
-          <CartItem 
-            key={item.product.id} 
-            item={item} 
-            onRemove={() => removeItem(item.product.id)}
-            onUpdate={(quantity) => updateQuantity(item.product.id, quantity)}
-            isUpdating={isUpdating}
-          />
+          // Оборачиваем CartItem в простой div, чтобы margin от space-y-4 применялся к нему, а не к элементу с overflow-hidden
+          <div key={`${item.product.id}-${item.variation?.id || ''}`}>
+            <CartItem 
+              item={item} 
+              onRemove={() => removeItem({ productId: item.product.id, variationId: item.variation?.id })}
+              onUpdate={(quantity) => updateQuantity(item.product.id, quantity, item.variation?.id)}
+              isUpdating={isUpdating}
+            />
+          </div>
         ))}
       </div>
 
@@ -133,11 +121,11 @@ export const CartPage = () => {
         <TotalsCard
             cart={cart}
             dashboard={dashboardData}
-            appliedCouponCode={appliedCouponCode} // Передаем из useCart
+            appliedCouponCode={appliedCouponCode}
             onApplyCoupon={handleApplyCoupon}
             onRemoveCoupon={handleRemoveCoupon}
-            isCartLoading={isCartLoading && !!appliedCouponCode}
-            pointsToSpend={pointsToSpend} // Передаем из useCart
+            isCartLoading={isCartLoading && !!appliedCouponCode} // isCartLoading используется здесь, а не isUpdating
+            pointsToSpend={pointsToSpend}
             onPointsToggle={handlePointsToggle}
             finalTotal={finalTotal}
         />

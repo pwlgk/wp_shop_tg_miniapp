@@ -21,6 +21,8 @@ import { CheckoutPage } from '@/pages/CheckoutPage';
 import { OrderSuccessPage } from '@/pages/OrderSuccessPage';
 import { ReferralPage } from '@/pages/ReferralPage';
 import { DeveloperPage } from '@/pages/DeveloperPage';
+import { ProductReviewsPage } from '@/pages/ProductReviewsPage';
+import { CreateReviewPage } from '@/pages/CreateReviewPage';
 
 
 export const AppRoutes = () => {
@@ -56,7 +58,8 @@ export const AppRoutes = () => {
             <Route path="/referral" element={<ReferralPage />} />
             <Route path="orders" element={<OrderListPage />} />
             <Route path="/developer" element={<DeveloperPage />} /> {/* <-- НОВЫЙ РОУТ */}
-
+            <Route path="/product/:id/reviews" element={<ProductReviewsPage />} />
+            <Route path="/product/:id/review/create" element={<CreateReviewPage />} />
             <Route path="*" element={<NotFoundPage />} />
         </Routes>
     );

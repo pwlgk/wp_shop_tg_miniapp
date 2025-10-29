@@ -1,6 +1,6 @@
 // src/pages/CheckoutPage.tsx
 import { useEffect, useState, useMemo } from 'react';
-import { useLocation, useNavigate} from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMe, getDashboard } from '@/api/services/user.api';
 import { createOrder } from '@/api/services/orders.api';
@@ -162,13 +162,23 @@ export const CheckoutPage = () => {
                 <Card className="rounded-2xl">
                     <CardHeader><CardTitle>Состав заказа</CardTitle></CardHeader>
                     <CardContent className="divide-y">
-                        {cartData.items.map(item => (
-                            <div key={item.product.id} className="flex gap-4 py-2 text-sm items-center">
-                                <img src={item.product.images[0]?.src || '/placeholder.svg'} alt={item.product.name} className="h-12 w-12 rounded-lg object-cover border" />
-                                <p className="flex-grow pr-2 line-clamp-1">{item.product.name} <span className="text-muted-foreground">x{item.quantity}</span></p>
-                                <p className="font-medium shrink-0">{(parseFloat(item.product.price) * item.quantity).toFixed(0)} ₽</p>
-                            </div>
-                        ))}
+                        {cartData.items.map(item => {
+                            const imageUrl = item.variation?.image?.src || item.product.images[0]?.src;
+                            const price = item.variation?.price || item.product.price;
+                            const attributesString = item.variation?.attributes.map(attr => attr.option).join(', ');
+
+                            return (
+                                <div key={`${item.product.id}-${item.variation?.id || ''}`} className="flex gap-4 py-3 text-sm items-center">
+                                    <img src={imageUrl || '/placeholder.svg'} alt={item.product.name} className="h-12 w-12 rounded-lg object-cover border" />
+                                    <div className="flex-grow">
+                                        <p className="font-medium line-clamp-1">{item.product.name}</p>
+                                        {attributesString && <p className="text-xs text-muted-foreground">{attributesString}</p>}
+                                        <p className="text-xs text-muted-foreground">Кол-во: {item.quantity}</p>
+                                    </div>
+                                    <p className="font-semibold shrink-0">{(parseFloat(price) * item.quantity).toFixed(0)} ₽</p>
+                                </div>
+                            );
+                        })}
                     </CardContent>
                 </Card>
 

@@ -69,3 +69,21 @@ export const interleaveArrays = (products: Product[], stories: Story[], every: n
 
     return mixedFeed;
 };
+
+/**
+ * Очищает строку от HTML-тегов, превращая ее в одну строку текста.
+ * @param htmlString - Входная строка с HTML.
+ * @returns Очищенный текст в одну строку.
+ */
+export const stripHtml = (htmlString: string): string => {
+  if (!htmlString) return '';
+  
+  // 1. Заменяем теги переноса на пробелы
+  const textWithSpaces = htmlString.replace(/<br\s*\/?>/gi, ' ').replace(/<\/p>/gi, ' ');
+  
+  // 2. Удаляем все остальные HTML-теги
+  const plainText = textWithSpaces.replace(/<[^>]*>/g, '');
+  
+  // 3. Сжимаем множественные пробелы в один и обрезаем по краям
+  return plainText.replace(/\s+/g, ' ').trim();
+};

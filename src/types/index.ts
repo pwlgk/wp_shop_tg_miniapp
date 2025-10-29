@@ -40,7 +40,59 @@ export interface ProductCategory {
 export interface ProductImage {
   id: number;
   src: string;
-  alt: string;
+  alt?: string;
+}
+
+export interface ReviewImage {
+  id: number;
+  src: string;
+}
+
+// Тип для одного отзыва
+export interface ProductReview {
+  id: number;
+  review: string;
+  rating: number;
+  reviewer: string;
+  date_created: string;
+  images: ReviewImage[];
+}
+
+// Тип для ответа с пагинацией отзывов
+export interface PaginatedReviews extends PaginatedResponse {
+  items: ProductReview[];
+}
+
+// Тип для создания отзыва
+export interface ReviewCreate {
+  review: string;
+  rating: number;
+  image_ids?: number[];
+}
+
+// Тип для ответа при загрузке медиа
+export interface MediaUploadResponse {
+  id: number;
+  source_url: string;
+}
+
+export interface Attribute {
+  id: number;
+  name: string;
+  option: string;
+}
+
+// Новый тип для одной вариации
+export interface ProductVariation {
+  id: number;
+  price: string;
+  regular_price: string;
+  sale_price: string;
+  on_sale: boolean;
+  stock_quantity: number | null;
+  stock_status: string;
+  attributes: Attribute[];
+  image: ProductImage;
 }
 
 export interface Product {
@@ -58,6 +110,10 @@ export interface Product {
   is_favorite: boolean;
   sku: string | null;
   stock_status: 'instock' | 'outofstock' | 'onbackorder';
+  variations: ProductVariation[] | null; // <-- ГЛАВНОЕ ИЗМЕНЕНИЕ
+  average_rating: string;
+  rating_count: number;
+  can_review: boolean;
 }
 
 // Тип для ответа от эндпоинта /products с пагинацией
@@ -72,6 +128,7 @@ export interface PaginatedProducts {
 export interface CartItem {
   product: Product;
   quantity: number;
+  variation: ProductVariation | null; // <-- Добавляем вариацию
 }
 
 export interface CartNotification {
@@ -92,7 +149,11 @@ export interface CartResponse {
   applied_coupon_code: string | null; // <-- Новое важное поле
 }
 
-
+export interface CartItemUpdate {
+  product_id: number;
+  quantity: number;
+  variation_id?: number; // <-- Добавляем опциональное поле
+}
 
 export interface Banner {
   id: number;

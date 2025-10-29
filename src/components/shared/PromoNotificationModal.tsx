@@ -1,6 +1,6 @@
 // src/components/shared/PromoNotificationModal.tsx
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"; // Добавляем DialogTitle
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden"; // Импортируем для доступности
+import { Dialog, DialogContent, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import type { Notification } from "@/types";
 import { PromoStory } from "./PromoStory";
 import { BirthdayStory } from "./BirthdayStory";
@@ -25,20 +25,27 @@ export const PromoNotificationModal = ({ notification, onClose }: PromoNotificat
 
   return (
     <Dialog open={true} onOpenChange={handleOpenChange}>
-      <DialogContent
-        // Убрали анимацию отсюда
-        className="p-0 border-none bg-transparent shadow-none w-screen h-screen max-w-full flex items-center justify-center data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+      <DialogContent 
+        className="bg-background h-auto max-h-[90vh] w-screen max-w-full p-4 flex flex-col border-none rounded-t-2xl bottom-0 top-auto translate-y-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom"
+        // --- ИЗМЕНЕНИЕ ЗДЕСЬ: Предотвращаем закрытие по Escape ---
+        onEscapeKeyDown={(e) => e.preventDefault()}
       >
-        {/* Решение проблемы доступности: добавляем скрытый заголовок */}
+        {/* --- НОВЫЙ БЛОК: Скрываем стандартную кнопку "X" --- */}
+        <DialogClose asChild className="hidden">
+            {/* Этот пустой div нужен, чтобы asChild работал, но кнопка будет скрыта классом hidden */}
+            <div></div>
+        </DialogClose>
+
         <VisuallyHidden asChild>
           <DialogTitle>{notification.title}</DialogTitle>
         </VisuallyHidden>
         
-        {/* Компоненты Story теперь отвечают за собственную анимацию */}
-        {isBirthday 
-            ? <BirthdayStory notification={notification} onClose={onClose} />
-            : <PromoStory notification={notification} onClose={onClose} />
-        }
+        <div className="overflow-y-auto -mx-4 px-4">
+            {isBirthday 
+                ? <BirthdayStory notification={notification} onClose={onClose} />
+                : <PromoStory notification={notification} onClose={onClose} />
+            }
+        </div>
       </DialogContent>
     </Dialog>
   );

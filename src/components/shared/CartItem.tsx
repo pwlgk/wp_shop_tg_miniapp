@@ -13,8 +13,16 @@ interface CartItemProps {
 }
 
 export const CartItem = ({ item, onRemove, onUpdate, isUpdating }: CartItemProps) => {
-  const stockQuantity = item.product.stock_quantity;
+  const isVariation = !!item.variation;
+  
+  const imageUrl = item.variation?.image?.src || item.product.images[0]?.src;
+  const price = item.variation?.price || item.product.price;
+  const stockQuantity = item.variation?.stock_quantity ?? item.product.stock_quantity;
   const isIncrementDisabled = isUpdating || (stockQuantity !== null && item.quantity >= stockQuantity);
+
+  const attributesString = isVariation && item.variation
+    ? item.variation.attributes.map(attr => attr.option).join(', ')
+    : null;
 
   const handleDecrement = (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -27,45 +35,45 @@ export const CartItem = ({ item, onRemove, onUpdate, isUpdating }: CartItemProps
     if (isIncrementDisabled) return;
     onUpdate(item.quantity + 1);
   };
-  
+
   const handleRemove = (e: React.MouseEvent) => {
     e.preventDefault(); e.stopPropagation();
     onRemove();
   };
 
   return (
-    <div className="relative overflow-hidden mb-4">
-        {/* Фон, который появляется при свайпе */}
+    <div className="relative overflow-hidden rounded-2xl">
         <div className="absolute inset-0 bg-destructive flex items-center justify-end px-6">
             <Trash2 className="h-6 w-6 text-destructive-foreground" />
         </div>
 
-        {/* Основной контент, который можно свайпать */}
         <motion.div
-            drag="x" // Разрешаем свайп по горизонтали
-            dragConstraints={{ left: 0, right: 0 }} // Ограничиваем свайп, чтобы не вылетал
-            onDragEnd={(_event, info) => {
-                // Если свайпнули влево больше чем на 100px, вызываем удаление
-                if (info.offset.x < -100) {
-                    onRemove();
-                }
-            }}
-            className="relative bg-background"
+            drag="x"
+            dragConstraints={{ left: -100, right: 0 }}
+            dragSnapToOrigin
+            onDragEnd={(_event, info) => { if (info.offset.x < -80) onRemove(); }}
+            className="relative bg-background w-full"
         >
-            <Link to={`/product/${item.product.id}`} className="block py-4 hover:bg-muted rounded-2xl">
+            <Link to={`/product/${item.product.id}`} className="block py-4 px-4 hover:bg-muted transition-colors">
                 <div className="flex items-start gap-4">
                     <img 
-                        src={item.product.images[0]?.src || '/placeholder.png'} 
+                        src={imageUrl || '/placeholder.svg'} 
                         alt={item.product.name}
                         className="w-24 h-24 object-cover rounded-lg border"
                         loading="lazy"
                     />
-                    <div className="flex-grow flex flex-col justify-between h-24">
+                    {/* --- ИЗМЕНЕНИЯ ЗДЕСЬ --- */}
+                    <div className="flex-grow flex flex-col">
+                        {/* 1. Убрали h-24 и justify-between */}
                         <div>
                             <p className="font-semibold leading-tight line-clamp-2">{item.product.name}</p>
-                            <p className="text-primary font-bold mt-1">{parseFloat(item.product.price).toFixed(0)} ₽</p>
+                            {attributesString && (
+                                <p className="text-sm text-muted-foreground mt-1">{attributesString}</p>
+                            )}
+                            <p className="text-primary font-bold mt-1">{parseFloat(price).toFixed(0)} ₽</p>
                         </div>
-                        <div className="flex items-center justify-between mt-2">
+                        {/* 2. Добавили mt-auto, чтобы прижать этот блок к низу */}
+                        <div className="flex items-center justify-between mt-auto pt-2">
                             <div className="flex items-center gap-2">
                                 <Button variant="outline" size="icon" className="h-control-xs w-control-xs" onClick={handleDecrement} disabled={isUpdating}><Minus className="h-4 w-4" /></Button>
                                 <span className="font-bold w-8 text-center">{item.quantity}</span>

@@ -1,6 +1,6 @@
 // src/api/services/cart.api.ts
 import api from '@/api';
-import type { CartResponse } from '@/types';
+import type { CartItemUpdate, CartResponse } from '@/types';
 
 // Получение содержимого корзины
 
@@ -25,12 +25,23 @@ export const getCart = async (params: GetCartParams = {}): Promise<CartResponse>
 };
 
 // Добавление/обновление товара
-export const updateCartItem = async (productId: number, quantity: number): Promise<void> => {
-  await api.post('/cart/items', { product_id: productId, quantity });
+export const updateCartItem = async ({ productId, quantity, variationId }: { productId: number; quantity: number; variationId?: number }): Promise<void> => {
+  const payload: CartItemUpdate = {
+    product_id: productId,
+    quantity,
+  };
+  if (variationId) {
+    payload.variation_id = variationId;
+  }
+  await api.post('/cart/items', payload);
 };
 
-// Удаление товара
-export const removeCartItem = async (productId: number): Promise<void> => {
-  await api.delete(`/cart/items/${productId}`);
+// Обновляем removeCartItem
+export const removeCartItem = async ({ productId, variationId }: { productId: number; variationId?: number }): Promise<void> => {
+    const params = new URLSearchParams();
+    if (variationId) {
+        params.append('variation_id', String(variationId));
+    }
+    await api.delete(`/cart/items/${productId}`, { params });
 };
 

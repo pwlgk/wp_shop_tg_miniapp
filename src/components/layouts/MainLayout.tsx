@@ -38,7 +38,7 @@ export const MainLayout = () => {
           <NavLink to="/">
             {({ isActive }) => (
               <div className="flex flex-col items-center gap-1 w-full transition-all duration-300">
-                <Home className={cn("h-6 w-6", isActive ? "text-primary scale-110" : "text-muted-foreground")} />
+                <Home className={cn("h-6 w-6", isActive ? "text-primary scale-110 fill-primary/10" : "text-muted-foreground")} />
                 <span className={cn("text-xs", isActive ? "font-semibold text-primary" : "font-normal text-muted-foreground")}>Главная</span>
               </div>
             )}
@@ -48,7 +48,7 @@ export const MainLayout = () => {
           <NavLink to="/catalog">
             {({ isActive }) => (
               <div className="flex flex-col items-center gap-1 w-full transition-all duration-300">
-                <LayoutGrid className={cn("h-6 w-6", isActive ? "text-primary scale-110" : "text-muted-foreground")} />
+                <LayoutGrid className={cn("h-6 w-6", isActive ? "text-primary scale-110 fill-primary/10" : "text-muted-foreground")} />
                 <span className={cn("text-xs", isActive ? "font-semibold text-primary" : "font-normal text-muted-foreground")}>Каталог</span>
               </div>
             )}
@@ -73,7 +73,7 @@ export const MainLayout = () => {
           <NavLink to="/cart">
             {({ isActive }) => (
                <div className="relative flex flex-col items-center gap-1 w-full transition-all duration-300">
-                <ShoppingCart className={cn("h-6 w-6", isActive ? "text-primary scale-110" : "text-muted-foreground")} />
+                <ShoppingCart className={cn("h-6 w-6", isActive ? "text-primary scale-110 fill-primary/10" : "text-muted-foreground")} />
                 <span className={cn("text-xs", isActive ? "font-semibold text-primary" : "font-normal text-muted-foreground")}>Корзина</span>
                 {cartItemCount > 0 && (
                   <span className="absolute -top-1 right-2.5 bg-primary text-primary-foreground text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
@@ -88,7 +88,7 @@ export const MainLayout = () => {
           <NavLink to="/profile">
             {({ isActive }) => (
               <div className="relative flex flex-col items-center gap-1 w-full transition-all duration-300">
-                <User className={cn("h-6 w-6", isActive ? "text-primary scale-110" : "text-muted-foreground")} />
+                <User className={cn("h-6 w-6", isActive ? "text-primary scale-110 fill-primary/10" : "text-muted-foreground")} />
                 <span className={cn("text-xs", isActive ? "font-semibold text-primary" : "font-normal text-muted-foreground")}>Профиль</span>
                 {hasActiveOrders && (
                   <span className="absolute -top-0 right-3 bg-primary rounded-full h-2 w-2" />
