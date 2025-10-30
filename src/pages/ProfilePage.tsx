@@ -142,7 +142,7 @@ export const ProfilePage = () => {
                     className="text-xs text-muted-foreground cursor-pointer select-none"
                     onClick={handleVersionClick}
                 >
-                    Kosynka Store v{import.meta.env.VITE_APP_VERSION} by pwlgk
+                    K-S v{import.meta.env.VITE_APP_VERSION} by pwlgk
                 </p>
             </div>
 

@@ -13,6 +13,27 @@ import type { Notification } from './types';
 const BOT_BLOCKED_SHOWN_KEY = 'botBlockedScreenLastShown';
 
 function App() {
+   useEffect(() => {
+    try {
+      const tgWebApp = (window as any).Telegram?.WebApp;
+      if (tgWebApp) {
+        // 1. Немедленный вызов. Сработает в большинстве случаев (deep link, inline-кнопки).
+        tgWebApp.expand();
+
+        // 2. "Страховочный" вызов с небольшой задержкой.
+        // Это нужно именно для запуска через Menu Button, когда WebView может инициализироваться медленнее.
+        const timer = setTimeout(() => {
+          tgWebApp.expand();
+        }, 150); // 150 мс - оптимальное время, незаметное для пользователя
+
+        // Очищаем таймер при размонтировании компонента
+        return () => clearTimeout(timer);
+      }
+    } catch (error) {
+      console.error("Failed to expand Telegram Web App:", error);
+    }
+  }, []);
+  
   const queryClient = useQueryClient();
 
   const { data: dashboard, isLoading: isDashboardLoading } = useQuery({

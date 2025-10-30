@@ -1,5 +1,5 @@
 // src/components/layouts/MainLayout.tsx
-import { useEffect } from 'react';
+// import { useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { Home, LayoutGrid, ShoppingCart, User, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,16 +14,16 @@ export const MainLayout = () => {
   // ИСПРАВЛЕНИЕ: Убран лишний апостроф
   const { hasActiveOrders } = useAppCounters();
 
-  useEffect(() => {
-    try {
-      const tgWebApp = (window as any).Telegram?.WebApp;
-      if (tgWebApp && !tgWebApp.isExpanded) {
-        tgWebApp.expand();
-      }
-    } catch (error) {
-      console.error("Failed to expand Telegram Web App:", error);
-    }
-  }, []);
+  // useEffect(() => {
+  //   try {
+  //     const tgWebApp = (window as any).Telegram?.WebApp;
+  //     if (tgWebApp && !tgWebApp.isExpanded) {
+  //       tgWebApp.expand();
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to expand Telegram Web App:", error);
+  //   }
+  // }, []);
 
   return (
     <div className="flex flex-col min-h-screen">

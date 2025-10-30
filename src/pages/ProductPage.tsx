@@ -7,7 +7,7 @@ import { useFavorite } from '@/hooks/useFavorite';
 import { useCart } from '@/hooks/useCart';
 import { useCartStore } from '@/store/cartStore';
 import { useBackButton } from '@/hooks/useBackButton';
-import { Heart, ShoppingBag, Share2, ArrowRight, ChevronRight } from 'lucide-react';
+import { Heart, ShoppingBag,  ArrowRight, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Carousel, type CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Label } from "@/components/ui/label";
@@ -17,14 +17,14 @@ import { SlideCounter } from '@/components/shared/SlideCounter';
 import { Badge } from '@/components/ui/badge';
 import { QuantitySelector } from '@/components/shared/QuantitySelector';
 import { ProductPageSkeleton } from '@/components/shared/ProductPageSkeleton';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 import { ProductNotFound } from '@/components/shared/ProductNotFound';
 import { StarRating } from '@/components/shared/StarRating';
 import { ReviewList } from '@/components/shared/ReviewList';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const MINI_APP_BASE_URL = import.meta.env.VITE_MINI_APP_BASE_URL || 'MINI_APP_BASE_URL';
+// const MINI_APP_BASE_URL = import.meta.env.VITE_MINI_APP_BASE_URL || 'MINI_APP_BASE_URL';
 
 const buttonVariants = {
   tap: { scale: 0.95 },
@@ -34,7 +34,7 @@ export const ProductPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const productId = Number(id);
-  const webApp = (window as any).Telegram?.WebApp;
+  // const webApp = (window as any).Telegram?.WebApp;
 
   useBackButton();
 
@@ -136,36 +136,36 @@ export const ProductPage = () => {
     favoriteMutation.mutate({ productId: product.id, isFavorite: product.is_favorite });
   };
 
-  const handleShare = () => {
-    if (!product) return;
-    const url = `${MINI_APP_BASE_URL}?startapp=product-${product.id}`;
+  // const handleShare = () => {
+  //   if (!product) return;
+  //   const url = `${MINI_APP_BASE_URL}?startapp=product-${product.id}`;
     
-    if (webApp?.showPopup) {
-        webApp.showPopup({
-            title: 'Поделиться товаром',
-            message: `Смотри, что я нашел(ла): ${product.name}`,
-            buttons: [
-                { id: 'share', type: 'default', text: 'Отправить' },
-                { id: 'copy', type: 'default', text: 'Копировать ссылку' },
-                { type: 'cancel' },
-            ]
-        }, (buttonId: string) => {
-            if (buttonId === 'share') {
-                webApp.switchInlineQuery(`${product.name} - ${url}`);
-            }
-            if (buttonId === 'copy') {
-                webApp.close();
-                navigator.clipboard.writeText(url).then(() => {
-                    toast.success("Ссылка скопирована!");
-                });
-            }
-        });
-    } else {
-        navigator.clipboard.writeText(url).then(() => {
-            toast.success("Ссылка на товар скопирована!");
-        });
-    }
-  };
+  //   if (webApp?.showPopup) {
+  //       webApp.showPopup({
+  //           title: 'Поделиться товаром',
+  //           message: `Смотри, что я нашел(ла): ${product.name}`,
+  //           buttons: [
+  //               { id: 'share', type: 'default', text: 'Отправить' },
+  //               { id: 'copy', type: 'default', text: 'Копировать ссылку' },
+  //               { type: 'cancel' },
+  //           ]
+  //       }, (buttonId: string) => {
+  //           if (buttonId === 'share') {
+  //               webApp.switchInlineQuery(`${product.name} - ${url}`);
+  //           }
+  //           if (buttonId === 'copy') {
+  //               webApp.close();
+  //               navigator.clipboard.writeText(url).then(() => {
+  //                   toast.success("Ссылка скопирована!");
+  //               });
+  //           }
+  //       });
+  //   } else {
+  //       navigator.clipboard.writeText(url).then(() => {
+  //           toast.success("Ссылка на товар скопирована!");
+  //       });
+  //   }
+  // };
 
   if (isLoading) { return <ProductPageSkeleton />; }
   if (isError && error?.response?.status === 404) { return <ProductNotFound />; }
@@ -202,11 +202,11 @@ export const ProductPage = () => {
                 </motion.button>
               </Button>
               
-              <Button asChild variant="ghost" size="icon" className="absolute bottom-2 left-3 h-control-sm w-control-sm rounded-full z-10 text-black/80 hover:bg-transparent">
+              {/* <Button asChild variant="ghost" size="icon" className="absolute bottom-2 left-3 h-control-sm w-control-sm rounded-full z-10 text-black/80 hover:bg-transparent">
                 <motion.button onClick={handleShare} variants={buttonVariants} whileTap="tap">
                     <Share2 className="h-5 w-5" />
                 </motion.button>
-              </Button>
+              </Button> */}
               
               {displayImages.length > 0 ? (
                   <Carousel setApi={setCarouselApi} className="w-full">
