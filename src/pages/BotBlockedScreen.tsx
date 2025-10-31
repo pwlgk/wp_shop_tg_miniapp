@@ -2,7 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Bot, Copy, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { useQueryClient } from '@tanstack/react-query'; // Для обновления данных
+import { useQueryClient } from '@tanstack/react-query';
+import { copyTextToClipboard } from '@telegram-apps/sdk'; // <-- 1. Импортируем новую функцию
 
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'YourBotUsername';
 
@@ -12,18 +13,22 @@ interface BotBlockedScreenProps {
 
 export const BotBlockedScreen = ({ onDismiss }: BotBlockedScreenProps) => {
     const queryClient = useQueryClient();
-    const webApp = (window as any).Telegram?.WebApp;
 
-    const handleCopyUsername = () => {
-        // Используем безопасный метод webApp.writeText, если он есть
-        if (webApp && webApp.writeText) {
-            webApp.writeText(`@${BOT_USERNAME}`, () => {
-                toast.success("Имя бота скопировано!");
-            });
-        } else {
-            // Fallback для браузера
+    // 2. Делаем обработчик асинхронным
+    const handleCopyUsername = async () => {
+        try {
+            // 3. Используем новую функцию. Она вернет Promise.
+            await copyTextToClipboard(`@${BOT_USERNAME}`);
+            toast.success("Имя бота скопировано!");
+        } catch (error) {
+            // Если SDK по какой-то причине не сработает (например, вне Telegram),
+            // используем стандартный метод браузера как фолбэк.
+            console.error("SDK copy failed, falling back to navigator:", error);
             navigator.clipboard.writeText(`@${BOT_USERNAME}`).then(() => {
                 toast.success("Имя бота скопировано!");
+            }).catch(err => {
+                toast.error("Не удалось скопировать");
+                console.error("Fallback copy failed:", err);
             });
         }
     };

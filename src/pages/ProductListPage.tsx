@@ -13,6 +13,7 @@ import type { PaginatedProducts, ProductCategory } from '@/types';
 import { useBackButton } from '@/hooks/useBackButton';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { InfiniteData } from '@tanstack/react-query';
+import { BrandHeader } from '@/components/shared/BrandHeader';
 
 const sortOptions = {
   popularity: 'Популярные',
@@ -21,6 +22,24 @@ const sortOptions = {
   'price-desc': 'Сначала дорогие',
 };
 type SortKey = keyof typeof sortOptions;
+
+const ProductListPageSkeleton = () => (
+    <>
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+        <div className="p-4">
+            <Skeleton className="h-8 w-3/4 mb-4" />
+            <div className="flex gap-2 mb-4">
+                <Skeleton className="h-control-sm w-control-sm rounded-full" />
+                <Skeleton className="h-control-sm w-control-sm rounded-full" />
+                <Skeleton className="h-control-sm w-32 rounded-full" />
+                <Skeleton className="h-control-sm w-24 rounded-full" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+                {Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+            </div>
+        </div>
+    </>
+);
 
 export const ProductListPage = () => {
   const navigate = useNavigate();
@@ -42,14 +61,10 @@ export const ProductListPage = () => {
     queryFn: getCategories,
   });
   
-  // --- ОБНОВЛЕННАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ КАТЕГОРИЙ И ЗАГОЛОВКОВ ---
   const parentCategory = allCategories?.find(cat => cat.id === parentCategoryId);
-  const selectedSubCategory = parentCategory?.children?.find(cat => cat.id === selectedSubCategoryId);
   const subCategories = parentCategory?.children ?? [];
-  
-  const pageTitle = selectedSubCategory?.name || parentCategory?.name || 'Каталог';
-  
-  // ИСПРАВЛЕНИЕ 1: Правильный текст для кнопки "Все"
+  const pageTitle = allCategories?.find(c => c.id === (selectedSubCategoryId || parentCategoryId))?.name || 'Каталог';
+
   const allButtonText = subCategories.length > 0 
     ? `Все в "${parentCategory?.name}"` 
     : (parentCategory?.name || 'Все');
@@ -80,62 +95,68 @@ export const ProductListPage = () => {
   }, [inView, hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   useEffect(() => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams);
     if (selectedSubCategoryId) {
       params.set('subcategory', String(selectedSubCategoryId));
+    } else {
+      params.delete('subcategory');
     }
     setSearchParams(params, { replace: true });
-  }, [selectedSubCategoryId, setSearchParams]);
+  }, [selectedSubCategoryId, setSearchParams, searchParams]);
 
   const allProducts = productsData?.pages.flatMap((page) => page.items) ?? [];
+  
+  const isLoading = areCategoriesLoading || areProductsLoading;
+
+  if (isLoading && allProducts.length === 0) {
+      return <ProductListPageSkeleton />;
+  }
 
   return (
     <div>
-      <div className="p-4">
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+      <div className="p-4 border-b">
         <h1 className="text-2xl font-bold truncate">{pageTitle}</h1>
       </div>
       
-      <div className="sticky top-0 bg-background/80 backdrop-blur-sm z-20 py-2 border-y">
+      <div className="sticky top-0 bg-background/80 backdrop-blur-sm z-20 py-2 border-b" style={{ top: 'var(--tg-viewport-header-height, 0px)' }}>
         <div className="flex items-center gap-2 px-4 overflow-x-auto scrollbar-hide">
-            <div className="flex items-center gap-2">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild><Button variant="outline" size="icon" className="shrink-0 rounded-2xl"><ListFilter className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-background/80">
-                        <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => setSortBy(value as SortKey)}>
-                            {Object.entries(sortOptions).map(([key, value]) => (<DropdownMenuRadioItem key={key} value={key}>{value}</DropdownMenuRadioItem>))}
-                        </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                <Button variant="outline" size="icon" className="shrink-0 rounded-2xl" onClick={() => navigate('/search')}><Search className="h-4 w-4" /></Button>
-            </div>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild><Button variant="outline" size="icon" className="shrink-0 rounded-full h-control-sm w-control-sm"><ListFilter className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => setSortBy(value as SortKey)}>
+                        {Object.entries(sortOptions).map(([key, value]) => (<DropdownMenuRadioItem key={key} value={key}>{value}</DropdownMenuRadioItem>))}
+                    </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+            </DropdownMenu>
+            <Button variant="outline" size="icon" className="shrink-0 rounded-full h-control-sm w-control-sm" onClick={() => navigate('/search')}><Search className="h-4 w-4" /></Button>
 
-            <div className="flex gap-2 whitespace-nowrap">
-                {/* ИСПРАВЛЕНИЕ 2: Определяем активность кнопки "Все" */}
-                <Button
-                    variant={(selectedSubCategoryId === null) ? 'default' : 'outline'}
-                    onClick={() => setSelectedSubCategoryId(null)}
-                    className="shrink-0 rounded-2xl"
-                >
-                    {allButtonText}
-                </Button>
-                {areCategoriesLoading 
-                    ? <Skeleton className="h-control-sm w-24 rounded-2xl" />
-                    : subCategories.map((category) => (
+            {subCategories.length > 0 && (
+                <>
+                    <Button
+                        variant={(selectedSubCategoryId === null) ? 'default' : 'outline'}
+                        onClick={() => setSelectedSubCategoryId(null)}
+                        className="shrink-0 rounded-full h-control-sm whitespace-nowrap"
+                    >
+                        {allButtonText}
+                    </Button>
+                    {subCategories.map((category) => (
                         <Button
                             key={category.id}
                             variant={selectedSubCategoryId === category.id ? 'default' : 'outline'}
                             onClick={() => setSelectedSubCategoryId(category.id)}
-                            className="shrink-0 rounded-2xl"
+                            className="shrink-0 rounded-full h-control-sm whitespace-nowrap"
                         >
                             {category.name}
                         </Button>
                     ))}
-            </div>
+                </>
+            )}
         </div>
       </div>
       
-      <div className="px-4 pt-4 grid grid-cols-2 gap-4 pb-4">
-        {areProductsLoading ? (
+      <div className="p-4 grid grid-cols-2 gap-3 pb-4">
+        {areProductsLoading && allProducts.length === 0 ? (
             Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
          ) : (
             allProducts.map((product, index) => (

@@ -1,5 +1,5 @@
 // src/hooks/useMainButton.ts
-import { useMainButton as useTmaMainButton } from "@tma.js/sdk-react";
+import { mainButton } from "@telegram-apps/sdk";
 import { useEffect } from "react";
 
 interface MainButtonParams {
@@ -20,37 +20,36 @@ export const useMainButton = ({
   isProgressVisible = false,
   isDisabled = false 
 }: MainButtonParams) => {
-  const mainButton = useTmaMainButton();
 
+  // Этот useEffect отвечает за подписку/отписку от клика и базовую инициализацию.
   useEffect(() => {
-    if (!mainButton) return;
-    mainButton.on('click', onClick);
+    // Монтируем компонент. Безопасно вызывать многократно.
+    mainButton.mount();
+
+    // Подписываемся на клик и получаем функцию для отписки.
+    const offClick = mainButton.onClick(onClick);
+
+    // Функция очистки, которая отписывается от события.
     return () => {
-      mainButton.off('click', onClick);
+      offClick();
     };
-  }, [mainButton, onClick]);
+  }, [onClick]);
   
+  // Этот useEffect отвечает за визуальное состояние кнопки.
   useEffect(() => {
-      if (!mainButton) return;
-      
-      mainButton.setText(text);
-      mainButton.setParams({
-          isVisible: isVisible, 
-          // ИСПРАВЛЕНИЕ: Правильный параметр - isEnabled
-          isEnabled: !isDisabled,
-      });
-      
-      if (isProgressVisible) {
-          mainButton.showLoader();
-      } else {
-          mainButton.hideLoader();
-      }
-      
-  }, [mainButton, text, isVisible, isProgressVisible, isDisabled]);
+    // Используем единый метод setParams для установки всех свойств.
+    mainButton.setParams({
+        text: text,
+        isVisible: isVisible, 
+        isEnabled: !isDisabled,
+        isLoaderVisible: isProgressVisible,
+    });
 
-  useEffect(() => {
-      return () => {
-          mainButton?.hide();
-      }
-  }, [mainButton]);
+    // Функция очистки, которая гарантирует, что кнопка скроется,
+    // когда компонент, использующий этот хук, будет размонтирован.
+    return () => {
+        // ИСПОЛЬЗУЕМ ПРАВИЛЬНЫЙ МЕТОД: setParams({ isVisible: false })
+        mainButton.setParams({ isVisible: false });
+    }
+  }, [text, isVisible, isProgressVisible, isDisabled]);
 };

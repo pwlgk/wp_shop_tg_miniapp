@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useBackButton } from "@/hooks/useBackButton";
 import { useParams, useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BrandHeader } from "@/components/shared/BrandHeader";
 
 const reviewSchema = z.object({
   rating: z.number().min(1, { message: "Пожалуйста, поставьте оценку." }),
@@ -24,16 +25,19 @@ const reviewSchema = z.object({
 });
 
 const CreateReviewPageSkeleton = () => (
-    <div className="p-4 animate-pulse">
-        <Skeleton className="h-9 w-3/4" />
-        <Skeleton className="h-4 w-1/2 mt-2 mb-6" />
-        <div className="space-y-6">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-32 w-full rounded-2xl" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-control-md w-full rounded-2xl mt-4" />
+    <>
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+        <div className="p-4 animate-pulse">
+            <Skeleton className="h-8 w-3/4 mb-2" /> {/* h-8 для text-2xl */}
+            <Skeleton className="h-4 w-1/2 mb-6" />
+            <div className="space-y-6">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-32 w-full rounded-2xl" />
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-control-md w-full rounded-2xl mt-4" />
+            </div>
         </div>
-    </div>
+    </>
 );
 
 export const CreateReviewPage = () => {
@@ -110,98 +114,103 @@ export const CreateReviewPage = () => {
 
   if (!product?.can_review) {
     return (
-        <div className="flex flex-col items-center justify-center h-[60vh] text-center p-4">
-            <ShieldAlert className="h-16 w-16 text-amber-500 mb-4" />
-            <h2 className="text-2xl font-bold">Невозможно оставить отзыв</h2>
-            <p className="text-muted-foreground mt-2 max-w-sm">
-                Вы уже оставили отзыв на этот товар или еще не совершали его покупку.
-            </p>
-            <Button onClick={() => navigate(-1)} className="mt-6 h-control-md rounded-2xl">
-                Вернуться назад
-            </Button>
-        </div>
+        <>
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-100px)] text-center p-4">
+                <ShieldAlert className="h-16 w-16 text-amber-500 mb-4" />
+                <h2 className="text-2xl font-bold">Невозможно оставить отзыв</h2>
+                <p className="text-muted-foreground mt-2 max-w-sm">
+                    Вы уже оставили отзыв на этот товар или еще не совершали его покупку.
+                </p>
+                <Button onClick={() => navigate(-1)} className="mt-6 h-control-md rounded-2xl">
+                    Вернуться назад
+                </Button>
+            </div>
+        </>
     );
   }
 
   return (
-    <div className="p-4">
-      <div className="pb-4 border-b mb-6">
-        <h1 className="text-3xl font-bold">Оставить отзыв</h1>
-        <p className="text-muted-foreground">Поделитесь вашим мнением о товаре</p>
-      </div>
+    <div>
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+      <div className="p-4">
+        <div className="pb-4 border-b mb-6">
+          <h1 className="text-2xl font-bold">Оставить отзыв</h1>
+          <p className="text-muted-foreground">Поделитесь вашим мнением о товаре</p>
+        </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="rating"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ваша оценка</FormLabel>
-                <FormControl>
-                  <div className="flex items-center gap-1" onMouseLeave={() => setHoveredRating(0)}>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={cn("h-8 w-8 cursor-pointer transition-colors", (hoveredRating || field.value) >= star ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/50')}
-                        onMouseEnter={() => setHoveredRating(star)}
-                        onClick={() => field.onChange(star)}
-                      />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="rating"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ваша оценка</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center gap-1" onMouseLeave={() => setHoveredRating(0)}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={cn("h-8 w-8 cursor-pointer transition-colors", (hoveredRating || field.value) >= star ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/50')}
+                          onMouseEnter={() => setHoveredRating(star)}
+                          onClick={() => field.onChange(star)}
+                        />
+                      ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="review"
+              render={({ field }) => (
+                <FormItem className="min-w-0">
+                  <FormLabel>Текст отзыва</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Расскажите о своих впечатлениях..." {...field} className="h-32 rounded-2xl" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormItem>
+                <FormLabel>Прикрепить фото (до 5 шт.)</FormLabel>
+                <div className="flex flex-wrap items-center gap-2">
+                    {imagePreviews.map((src, index) => (
+                        <div key={index} className="relative h-20 w-20 shrink-0">
+                            <img src={src} className="h-full w-full object-cover rounded-lg" alt={`Preview ${index}`} />
+                            <Button 
+                              variant="destructive" 
+                              size="icon" 
+                              className="absolute top-1 right-1 h-6 w-6 rounded-full bg-black/50 text-white hover:bg-black/70" 
+                              onClick={() => removeImage(index)}
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
                     ))}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="review"
-            render={({ field }) => (
-              // --- ГЛАВНОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-              <FormItem className="min-w-0">
-                <FormLabel>Текст отзыва</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Расскажите о своих впечатлениях..." {...field} className="h-32 rounded-2xl" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormItem>
-              <FormLabel>Прикрепить фото (до 5 шт.)</FormLabel>
-              <div className="flex flex-wrap items-center gap-2">
-                  {imagePreviews.map((src, index) => (
-                      <div key={index} className="relative h-20 w-20 shrink-0">
-                          <img src={src} className="h-full w-full object-cover rounded-lg" alt={`Preview ${index}`} />
-                          <Button 
-                            variant="destructive" 
-                            size="icon" 
-                            className="absolute top-1 right-1 h-6 w-6 rounded-full bg-black/50 text-white hover:bg-black/70" 
-                            onClick={() => removeImage(index)}
-                          >
-                              <X className="h-4 w-4" />
-                          </Button>
-                      </div>
-                  ))}
-                  {imageFiles.length < 5 && (
-                    <Label htmlFor="review-images" className="cursor-pointer h-20 w-20 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary shrink-0">
-                        <ImagePlus className="h-8 w-8" />
-                    </Label>
-                  )}
-                  <Input id="review-images" type="file" multiple accept="image/*" className="sr-only" onChange={handleFileChange} />
-              </div>
-          </FormItem>
-          
-          <div className="pt-4">
-            <Button type="submit" disabled={isLoading} className="w-full h-control-md rounded-2xl">
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Отправить отзыв
-            </Button>
-          </div>
-        </form>
-      </Form>
+                    {imageFiles.length < 5 && (
+                      <Label htmlFor="review-images" className="cursor-pointer h-20 w-20 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary shrink-0">
+                          <ImagePlus className="h-8 w-8" />
+                      </Label>
+                    )}
+                    <Input id="review-images" type="file" multiple accept="image/*" className="sr-only" onChange={handleFileChange} />
+                </div>
+            </FormItem>
+            
+            <div className="pt-4">
+              <Button type="submit" disabled={isLoading} className="w-full h-control-md rounded-2xl">
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Отправить отзыв
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 };

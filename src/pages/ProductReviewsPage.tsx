@@ -2,6 +2,7 @@
 import { useParams, useLocation } from "react-router-dom";
 import { useBackButton } from "@/hooks/useBackButton";
 import { ReviewList } from "@/components/shared/ReviewList";
+import { BrandHeader } from "@/components/shared/BrandHeader";
 
 export const ProductReviewsPage = () => {
     useBackButton();
@@ -14,9 +15,10 @@ export const ProductReviewsPage = () => {
 
     return (
         <div>
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
             <div className="p-4 border-b">
                 <h1 className="text-2xl font-bold">Отзывы ({ratingCount || ''})</h1>
-                {productName && <p className="text-muted-foreground truncate pt-2">{productName}</p>}
+                {productName && <p className="text-muted-foreground truncate pt-1">{productName}</p>}
             </div>
             <div className="px-4">
                 <ReviewList productId={productId} />

@@ -1,17 +1,14 @@
 // src/hooks/useBackButton.ts
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useBackButton as useTmaBackButton } from '@tma.js/sdk-react';
+import { backButton } from '@telegram-apps/sdk';
 
 export const useBackButton = (visible = true) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const backButton = useTmaBackButton();
 
   useEffect(() => {
-    if (!backButton) return;
     const handleBackClick = () => {
-      // Если это первая запись в истории, идем на главную
       if (location.key === 'default') {
         navigate('/');
       } else {
@@ -19,16 +16,25 @@ export const useBackButton = (visible = true) => {
       }
     };
 
+    // Монтируем компонент. Это безопасно, так как повторные вызовы игнорируются.
+    backButton.mount();
+    
+    let offClick: (() => void) | undefined;
+
     if (visible) {
-      backButton.on('click', handleBackClick);
+      // ИСПОЛЬЗУЕМ ПРАВИЛЬНЫЙ МЕТОД: onClick
+      // Он возвращает функцию для отписки
+      offClick = backButton.onClick(handleBackClick);
       backButton.show();
     }
 
+    // Функция очистки эффекта
     return () => {
-      if (visible) {
-        backButton.off('click', handleBackClick);
-        backButton.hide();
+      // Если была создана подписка, отписываемся
+      if (offClick) {
+        offClick();
       }
+      backButton.hide();
     };
-  }, [visible, backButton, navigate, location.key]);
+  }, [visible, navigate, location.key]);
 };

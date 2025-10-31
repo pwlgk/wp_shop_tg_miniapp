@@ -1,61 +1,77 @@
 // src/hooks/useAuth.ts
-import { useEffect, useState } from 'react';
-import { retrieveLaunchParams } from '@tma.js/sdk';
-import { useAuthStore } from '@/store/authStore';
-import { loginViaTelegram } from '@/api/services/auth.api.ts';
 
-// Принимаем isHydrated как аргумент-сигнал
-export const useAuth = (isHydrated: boolean) => {
+import { useEffect, useState } from 'react';
+import { useRawInitData } from '@telegram-apps/sdk-react';
+import { useAuthStore } from '@/store/authStore';
+import { loginViaTelegram } from '@/api/services/auth.api';
+
+// --- ИЗМЕНЕНИЕ 1: Добавляем sdkReady в параметры хука ---
+export const useAuth = (isHydrated: boolean, sdkReady: boolean) => {
   const { accessToken, setToken } = useAuthStore();
   const [status, setStatus] = useState<'pending' | 'success' | 'error'>('pending');
   const [error, setError] = useState<string | null>(null);
 
+  const initDataRaw = useRawInitData();
+
   useEffect(() => {
-    // 1. Не начинаем работу, пока zustand не закончил гидратацию
-    if (!isHydrated) {
+    // Детальное логирование для отладки
+    console.log('[useAuth Hook]', {
+      isHydrated,
+      sdkReady,
+      hasAccessToken: !!accessToken,
+      initDataRaw: initDataRaw ? `present (${initDataRaw.length} chars)` : 'missing',
+      status
+    });
+
+    // --- ИЗМЕНЕНИЕ 2: Ждем, пока и гидрация, и SDK будут готовы ---
+    if (!isHydrated || !sdkReady) {
+      // Если одно из условий не выполнено, мы просто выходим и ждем следующего ре-рендера.
+      // Не меняем статус, чтобы хук оставался в состоянии 'pending'.
       return;
     }
 
-    // 2. Если после гидратации токен уже есть, работа завершена
     if (accessToken) {
-      setStatus('success');
+      // Если токен уже есть, аутентификация не нужна.
+      if (status !== 'success') {
+        setStatus('success');
+      }
       return;
     }
 
-    // 3. Если токена нет, запускаем процесс получения
+    // Если все готово, но initData нет - это критическая ошибка.
+    if (!initDataRaw) {
+      console.error('[useAuth Hook] CRITICAL: SDK is ready, but initDataRaw is missing. Cannot authenticate.');
+      setError('Критическая ошибка: не найдены данные для инициализации (initData).');
+      setStatus('error');
+      return;
+    }
+    
+    // Предотвращаем повторный запуск аутентификации, если она уже идет или завершилась
+    if (status !== 'pending') {
+        return;
+    }
+
     const authenticate = async () => {
       try {
-        const launchParams = retrieveLaunchParams();
-        const initDataRaw = launchParams.initDataRaw;
-
-        if (initDataRaw) {
-          const response = await loginViaTelegram(initDataRaw);
-          setToken(response.access_token);
-          setStatus('success');
-        } else if (import.meta.env.DEV) {
-          const mockInitData = "user=...&hash=..."; // ВАШ МОКОВЫЙ initData
-          if (!mockInitData.includes('user')) {
-             throw new Error('Please, provide mock initData string in useAuth.ts');
-          }
-          const response = await loginViaTelegram(mockInitData);
-          setToken(response.access_token);
-          setStatus('success');
-        } else {
-          throw new Error('Telegram initData not found.');
-        }
+        console.log('[useAuth Hook] Authenticating with initData...');
+        const response = await loginViaTelegram(initDataRaw);
+        setToken(response.access_token);
+        setStatus('success');
+        console.log('[useAuth Hook] Authentication successful.');
       } catch (err: any) {
-        setError(err.message || 'Authentication failed.');
+        console.error('[useAuth Hook] Authentication failed.', err);
+        setError(err.message || 'Произошла ошибка при аутентификации.');
         setStatus('error');
       }
     };
 
     authenticate();
-  }, [isHydrated, accessToken, setToken]); // Запускаемся, когда isHydrated станет true
+    
+  }, [isHydrated, sdkReady, accessToken, setToken, initDataRaw, status]); // Добавлен status в зависимости
 
-  return { 
-    // Загрузка идет, пока не завершена гидратация ИЛИ пока статус в ожидании
-    isLoading: !isHydrated || status === 'pending', 
-    error, 
-    isAuthenticated: status === 'success' && !!accessToken
+  return {
+    isLoading: status === 'pending',
+    error,
+    isAuthenticated: status === 'success' && !!accessToken,
   };
 };

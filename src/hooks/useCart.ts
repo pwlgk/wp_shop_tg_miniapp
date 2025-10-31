@@ -1,4 +1,5 @@
 // src/hooks/useCart.ts
+
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { getCart, removeCartItem, updateCartItem } from '@/api/services/cart.api';
 import { useCartStore } from '@/store/cartStore';
@@ -27,6 +28,12 @@ export const useCart = () => {
   useEffect(() => {
     if (cartData) {
       setCart(cartData.items);
+
+      // --- ЛОГИКА УПРОЩЕНА ---
+      // Сбрасывать pointsToSpend здесь не нужно, т.к. это вызовет
+      // лишние запросы. Сброс будет происходить после мутаций.
+      
+      // Обработка уведомлений от сервера
       if (cartData.notifications && cartData.notifications.length > 0) {
         const lastNotification = cartData.notifications[cartData.notifications.length - 1];
         const notificationId = `${lastNotification.level}-${lastNotification.message}`;
@@ -37,12 +44,23 @@ export const useCart = () => {
             shownNotificationIds.current.add(notificationId);
         }
       }
+      
+      // Если сервер сказал, что купон не применен, сбрасываем его на клиенте
       if (cartData.applied_coupon_code === null && appliedCouponCode !== null) {
         setAppliedCouponCode(null);
       }
     }
   }, [cartData, setCart, appliedCouponCode, setAppliedCouponCode]);
   
+  // --- ИЗМЕНЕНИЕ 1: Добавляем onSuccess в мутации для сброса баллов ---
+  const handleMutationSuccess = () => {
+    if (pointsToSpend > 0) {
+        console.log('[useCart] Resetting points after cart mutation.');
+        setPointsToSpend(0);
+        // toast.info("Скидка баллами была сброшена из-за изменения состава корзины.");
+    }
+  };
+
   const handleMutationEnd = () => {
     queryClient.invalidateQueries({ queryKey: ['cart'] });
     queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -51,26 +69,15 @@ export const useCart = () => {
   const updateItemMutation = useMutation({
     mutationFn: ({ productId, quantity, variationId }: { productId: number; quantity: number; variationId?: number }) => 
         updateCartItem({ productId, quantity, variationId }),
+    onSuccess: handleMutationSuccess, // <-- Сбрасываем баллы при успехе
     onMutate: async ({ productId, quantity, variationId }) => {
         await queryClient.cancelQueries({ queryKey: ['cart'] });
         const previousCart = queryClient.getQueryData<CartResponse>(['cart']);
         
         queryClient.setQueryData<CartResponse>(['cart'], (oldCart) => {
             if (!oldCart) return undefined;
-            
-            const itemIdentifier = (item: CartItem) => 
-                variationId ? item.variation?.id === variationId : item.product.id === productId && !item.variation;
-
-            const existingItem = oldCart.items.find(itemIdentifier);
-            let newItems: CartItem[];
-
-            if (existingItem) {
-                newItems = oldCart.items.map(item => itemIdentifier(item) ? { ...item, quantity } : item);
-            } else {
-                // Optimistic add для вариаций сложен без полного объекта Product.
-                // Поэтому при добавлении нового товара/вариации UI обновится после ответа сервера.
-                return oldCart; 
-            }
+            const itemIdentifier = (item: CartItem) => variationId ? item.variation?.id === variationId : item.product.id === productId && !item.variation;
+            const newItems = oldCart.items.map(item => itemIdentifier(item) ? { ...item, quantity } : item);
             return { ...oldCart, items: newItems };
         });
         return { previousCart };
@@ -87,19 +94,15 @@ export const useCart = () => {
   const removeItemMutation = useMutation({
     mutationFn: ({ productId, variationId }: { productId: number; variationId?: number }) => 
         removeCartItem({ productId, variationId }),
+    onSuccess: handleMutationSuccess, // <-- Сбрасываем баллы при успехе
     onMutate: async ({ productId, variationId }) => {
         await queryClient.cancelQueries({ queryKey: ['cart'] });
         const previousCart = queryClient.getQueryData<CartResponse>(['cart']);
 
         queryClient.setQueryData<CartResponse>(['cart'], (oldCart) => {
             if (!oldCart) return oldCart;
-            const itemIdentifier = (item: CartItem) => 
-                variationId ? item.variation?.id === variationId : item.product.id === productId && !item.variation;
-            
-            return {
-                ...oldCart,
-                items: oldCart.items.filter(item => !itemIdentifier(item))
-            };
+            const itemIdentifier = (item: CartItem) => variationId ? item.variation?.id === variationId : item.product.id === productId && !item.variation;
+            return { ...oldCart, items: oldCart.items.filter(item => !itemIdentifier(item)) };
         });
         
         return { previousCart };
@@ -114,9 +117,7 @@ export const useCart = () => {
   });
   
   const addToCart = (product: Product, quantity = 1, variationId?: number) => {
-    const itemIdentifier = (item: CartItem) => 
-        variationId ? item.variation?.id === variationId : item.product.id === product.id && !item.variation;
-
+    const itemIdentifier = (item: CartItem) => variationId ? item.variation?.id === variationId : item.product.id === product.id && !item.variation;
     const existingItem = cartData?.items.find(itemIdentifier);
     const newQuantity = existingItem ? existingItem.quantity + quantity : quantity;
     updateItemMutation.mutate({ productId: product.id, quantity: newQuantity, variationId });

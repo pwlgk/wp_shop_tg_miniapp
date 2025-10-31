@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getDashboard } from '@/api/services/user.api';
 import { SearchInput } from './SearchInput'; // <-- Импортируем
 
-export const HomePageHeader = () => {
+export const SearchHeader = () => {
     const navigate = useNavigate();
     const { data: dashboard } = useQuery({ queryKey: ['dashboard'], queryFn: getDashboard });
 

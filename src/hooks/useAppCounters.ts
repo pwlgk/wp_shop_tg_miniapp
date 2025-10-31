@@ -8,25 +8,28 @@ import { useAuthStore } from '@/store/authStore';
 
 export const useAppCounters = () => {
   const { accessToken } = useAuthStore();
-  const setCartTotal = useCartStore((state) => state.setTotal); // <-- Получаем новую функцию
+  const setCartTotal = useCartStore((state) => state.setTotal);
   const setFavoritesTotal = useFavoritesStore((state) => state.setTotal);
   
   const [hasActiveOrders, setHasActiveOrders] = useState(false);
 
+  // Мы по-прежнему используем этот запрос, но теперь он будет получать
+  // данные из кэша, который заполнит AppInitializer.
   const { data: dashboardData } = useQuery({
     queryKey: ['dashboard'],
     queryFn: getDashboard,
     enabled: !!accessToken,
-    staleTime: 1000 * 60 * 1, // Кэшируем данные на 1 минуту
+    staleTime: 1000 * 60 * 1,
   });
 
-  // Синхронизируем сторы, когда приходят данные с сервера
   useEffect(() => {
+    // Добавляем проверку, что dashboardData существует
     if (dashboardData) {
-      // ИСПРАВЛЕНИЕ: Теперь обновляем оба счетчика
-      setCartTotal(dashboardData.counters.cart_items_count);
-      setFavoritesTotal(dashboardData.counters.favorite_items_count);
-
+      // Это условие предотвратит ошибку "Cannot read properties of undefined"
+      if (dashboardData.counters) {
+        setCartTotal(dashboardData.counters.cart_items_count);
+        setFavoritesTotal(dashboardData.counters.favorite_items_count);
+      }
       setHasActiveOrders(dashboardData.has_active_orders);
     }
   }, [dashboardData, setCartTotal, setFavoritesTotal]);

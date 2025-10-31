@@ -7,7 +7,24 @@ import { useBackButton } from "@/hooks/useBackButton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Bell, CheckCheck } from "lucide-react";
-import { NotificationListItem } from "@/components/shared/NotificationListItem"; // <-- Импортируем новый компонент
+import { NotificationListItem } from "@/components/shared/NotificationListItem";
+import { BrandHeader } from "@/components/shared/BrandHeader";
+
+const NotificationsPageSkeleton = () => (
+    <>
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+        <div className="p-4">
+            <div className="flex justify-between items-center mb-4">
+                <Skeleton className="h-8 w-1/2" /> {/* h-8 для text-2xl */}
+                <Skeleton className="h-9 w-32" />
+            </div>
+            <div className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-lg" />)}
+            </div>
+        </div>
+    </>
+);
+
 
 export const NotificationsPage = () => {
     useBackButton();
@@ -38,26 +55,24 @@ export const NotificationsPage = () => {
     const hasUnread = allNotifications.some(n => !n.is_read);
 
     if (isLoading) {
-        return (
-            <div className="p-4">
-                <Skeleton className="h-9 w-1/3 mb-4" />
-                <div className="space-y-2">
-                    {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
-                </div>
-            </div>
-        );
+        return <NotificationsPageSkeleton />;
     }
 
     return (
         <div>
-            <div className="flex justify-between items-center p-4 border-b sticky top-0 bg-background/80 backdrop-blur-sm z-10">
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+            <header 
+                className="flex justify-between items-center p-4 border-b sticky top-0 bg-background/80 backdrop-blur-sm z-10"
+                style={{ top: 'var(--tg-viewport-header-height, 0px)' }}
+            >
                 <h1 className="text-2xl font-bold">Уведомления</h1>
                 {hasUnread && (
                     <Button variant="ghost" size="sm" onClick={() => readAllMutation.mutate()} disabled={readAllMutation.isPending}>
                         <CheckCheck className="mr-2 h-4 w-4" /> Прочитать все
                     </Button>
                 )}
-            </div>
+            </header>
+            
             {allNotifications.length > 0 ? (
                 <div className="divide-y">
                     {allNotifications.map((notification, index) => (
@@ -68,12 +83,12 @@ export const NotificationsPage = () => {
                             }
                         </Fragment>
                     ))}
-                    {isFetchingNextPage && <div className="p-4"><Skeleton className="h-24 w-full" /></div>}
+                    {isFetchingNextPage && <div className="p-4"><Skeleton className="h-24 w-full rounded-lg" /></div>}
                 </div>
             ) : (
-                <div className="text-center p-16 text-muted-foreground">
-                    <Bell className="h-12 w-12 mx-auto mb-4" />
-                    <p>Здесь будут появляться уведомления о заказах и акциях</p>
+                <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] text-center p-4">
+                    <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">Здесь будут появляться уведомления о заказах и акциях</p>
                 </div>
             )}
         </div>

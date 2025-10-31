@@ -9,15 +9,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag } from "lucide-react";
+import { BrandHeader } from "@/components/shared/BrandHeader";
+
+const OrderListPageSkeleton = () => (
+    <>
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+        <div className="p-4 space-y-4">
+            <Skeleton className="h-8 w-1/2 mb-2" /> {/* h-8 для text-2xl */}
+            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}
+        </div>
+    </>
+);
 
 export const OrderListPage = () => {
     useBackButton();
 
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } = useInfiniteQuery({
         queryKey: ['orders'],
-        // ИЗМЕНЕНИЕ ЗДЕСЬ:
-        // Передаем строку со всеми необходимыми статусами в API.
-        // Бэкенд должен уметь принимать несколько статусов через запятую.
         queryFn: ({ pageParam = 1 }) => getOrdersHistory({ 
             page: pageParam,
             status: "pending,processing,on-hold,completed,cancelled"
@@ -37,40 +45,43 @@ export const OrderListPage = () => {
     const allOrders = data?.pages.flatMap(page => page.items) ?? [];
 
     if (isLoading) {
-        return (
-            <div className="p-4 space-y-4">
-                <h1 className="text-2xl font-bold">Мои заказы</h1>
-                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}
-            </div>
-        );
+        return <OrderListPageSkeleton />;
     }
     
     if (isError) {
-        return <div className="p-4 text-center">Ошибка загрузки заказов.</div>;
+        return (
+            <>
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+                <div className="p-4 text-center">Ошибка загрузки заказов.</div>
+            </>
+        );
     }
 
     return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">Мои заказы</h1>
-            {allOrders.length > 0 ? (
-                <div className="space-y-4">
-                    {allOrders.map((order, index) => (
-                        <Fragment key={order.id}>
-                            {index === allOrders.length - 1 
-                                ? <div ref={ref}><OrderListItem order={order} /></div>
-                                : <OrderListItem order={order} />
-                            }
-                        </Fragment>
-                    ))}
-                    {isFetchingNextPage && <Skeleton className="h-28 w-full rounded-2xl" />}
-                </div>
-            ) : (
-                <div className="text-center pt-16">
-                    <ShoppingBag className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold">У вас еще нет заказов</h2>
-                    <Button asChild className="mt-6 h-control-md rounded-2xl"><Link to="/">Начать покупки</Link></Button>
-                </div>
-            )}
+        <div>
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+            <div className="p-4">
+                <h1 className="text-2xl font-bold mb-4">Мои заказы</h1>
+                {allOrders.length > 0 ? (
+                    <div className="space-y-4">
+                        {allOrders.map((order, index) => (
+                            <Fragment key={order.id}>
+                                {index === allOrders.length - 1 
+                                    ? <div ref={ref}><OrderListItem order={order} /></div>
+                                    : <OrderListItem order={order} />
+                                }
+                            </Fragment>
+                        ))}
+                        {isFetchingNextPage && <Skeleton className="h-28 w-full rounded-2xl" />}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-[calc(100vh-150px)] text-center p-4">
+                        <ShoppingBag className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                        <h2 className="text-2xl font-bold">У вас еще нет заказов</h2>
+                        <Button asChild className="mt-6 h-control-md rounded-2xl"><Link to="/">Начать покупки</Link></Button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

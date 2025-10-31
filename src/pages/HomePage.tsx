@@ -12,8 +12,9 @@ import { ListFilter } from 'lucide-react';
 import type { PaginatedProducts, ProductCategory } from '@/types';
 import { useSearchParams } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
-import { HomePageHeader } from '@/components/shared/HomePageHeader';
+import { SearchHeader } from '@/components/shared/SearchHeader';
 import type { InfiniteData } from '@tanstack/react-query';
+import { BrandHeader } from '@/components/shared/BrandHeader';
 
 const sortOptions = {
     popularity: 'Популярные',
@@ -90,7 +91,8 @@ export const HomePage = () => {
 
     return (
         <div className="relative">
-            <HomePageHeader />
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+            <SearchHeader />
             
             <main className="space-y-6 pb-4">
                 <div >

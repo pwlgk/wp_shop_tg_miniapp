@@ -1,5 +1,5 @@
 // src/hooks/useDeepLink.ts
-import { useLaunchParams } from '@tma.js/sdk-react';
+import { initData } from '@telegram-apps/sdk'; // <-- 1. Заменяем импорт
 import { useMemo } from 'react';
 
 // Хук теперь возвращает объект с путем и флагом, был ли он "первым"
@@ -9,10 +9,10 @@ export interface DeepLinkResult {
 }
 
 export const useDeepLink = (): DeepLinkResult => {
-    const launchParams = useLaunchParams();
+    // 2. Вместо хука useLaunchParams, напрямую вызываем сигнал для получения startParam
+    const startParam = initData.startParam();
 
     return useMemo(() => {
-        const startParam = launchParams.startParam;
         if (!startParam) {
             return { path: null, isFirstInSession: false };
         }
@@ -33,5 +33,5 @@ export const useDeepLink = (): DeepLinkResult => {
 
         return { path, isFirstInSession: isFirst };
         
-    }, [launchParams.startParam]);
+    }, [startParam]); // 3. Обновляем зависимость в useMemo
 };

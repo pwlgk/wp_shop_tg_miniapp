@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 .certs
 *.bak
+.env.prod
+prepare_project.py

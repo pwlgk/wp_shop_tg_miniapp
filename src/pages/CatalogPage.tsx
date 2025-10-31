@@ -8,30 +8,25 @@ import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CategoryBannerCard } from '@/components/shared/CategoryBannerCard';
-// import { HomePageHeader } from '@/components/shared/HomePageHeader';
+import { BrandHeader } from '@/components/shared/BrandHeader';
 
+// --- НОВЫЙ КОМПОНЕНТ: Скелетон страницы ---
 const CatalogPageSkeleton = () => (
-    <div className="animate-pulse">
-        <div className="p-4"><Skeleton className="h-9 w-1/2" /></div>
-        <div className="p-4 space-y-4">
-            <Skeleton className="h-40 w-full rounded-2xl" />
-            <Skeleton className="h-40 w-full rounded-2xl" />
-            <Skeleton className="h-40 w-full rounded-2xl" />
+    <>
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+        <div className="p-4">
+            <div className="flex justify-between items-center mb-4">
+                <Skeleton className="h-8 w-1/3" /> {/* h-8 для text-2xl */}
+                <Skeleton className="h-10 w-10 rounded-full" />
+            </div>
+            <div className="space-y-4">
+                <Skeleton className="h-40 w-full rounded-2xl" />
+                <Skeleton className="h-40 w-full rounded-2xl" />
+                <Skeleton className="h-40 w-full rounded-2xl" />
+            </div>
         </div>
-    </div>
+    </>
 );
-
-// Карточка "Все товары"
-// const AllProductsCard = () => (
-//     <Link to="/" className="block group">
-//         <div className="relative overflow-hidden rounded-2xl p-4 h-full bg-muted/50 hover:bg-muted transition-colors flex flex-col items-center justify-center text-center">
-//             <Grid className="h-10 w-10 text-muted-foreground mb-2" />
-//             <h3 className="font-semibold text-lg">Посмотреть все товары</h3>
-//             <p className="text-sm text-muted-foreground">Перейти в полный каталог</p>
-//         </div>
-//     </Link>
-// );
-
 
 export const CatalogPage = () => {
     useBackButton();
@@ -47,7 +42,12 @@ export const CatalogPage = () => {
     }
 
     if (isError) {
-        return <div className="p-4 text-center text-destructive">Не удалось загрузить категории.</div>;
+        return (
+            <>
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+                <div className="p-4 text-center text-destructive">Не удалось загрузить категории.</div>
+            </>
+        );
     }
 
     // API уже возвращает корневые категории на верхнем уровне.
@@ -55,28 +55,22 @@ export const CatalogPage = () => {
 
     return (
         <div className="pb-8">
-            {/* "Липкая" шапка */}
-                        {/* <HomePageHeader /> */}
+            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
 
-            <header className=" z-30 "
-                style={{ paddingTop: 'var(--tg-viewport-header-height)' }}>
-                <div className="p-4 flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">Каталог</h1>
-                    <Button variant="ghost" size="icon" onClick={() => navigate('/search')}>
-                        <Search className="h-5 w-5" />
-                    </Button>
-                </div>
-            </header>
+            {/* Шапка страницы: Заголовок и кнопка поиска */}
+            <div className="p-4 flex justify-between items-center">
+                <h1 className="text-2xl font-bold">Каталог</h1>
+                <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate('/search')}>
+                    <Search className="h-5 w-5" />
+                </Button>
+            </div>
 
             {/* Вертикальный список карточек-категорий */}
-            <div className="space-y-4 p-4 pt-0 ">
+            <div className="space-y-4 px-4">
                 {rootCategories.map(category => (
                     // Мы рендерим карточку-баннер, только если у категории есть фото
                     category.image_src && <CategoryBannerCard key={category.id} category={category} />
                 ))}
-
-                {/* Финальная карточка "Все товары" */}
-                {/* <AllProductsCard /> */}
             </div>
         </div>
     );
