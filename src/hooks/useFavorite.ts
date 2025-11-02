@@ -1,8 +1,10 @@
 // src/hooks/useFavorite.ts
+
 import { useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import { addFavorite, removeFavorite } from '@/api/services/favorites.api';
 import type { Product, PaginatedProducts } from '@/types';
-import { toast } from 'sonner';
+// --- ИЗМЕНЕНИЕ 1: Импортируем наш хелпер ---
+import { handleApiError } from '@/api/errorHandler';
 
 export const useFavorite = () => {
   const queryClient = useQueryClient();
@@ -11,10 +13,11 @@ export const useFavorite = () => {
     mutationFn: ({ productId, isFavorite }: { productId: number; isFavorite: boolean }) =>
       isFavorite ? removeFavorite(productId) : addFavorite(productId),
     
+    // onMutate остается без изменений, он отвечает за оптимистичное обновление
     onMutate: async ({ productId, isFavorite }) => {
       await queryClient.cancelQueries({ queryKey: ['products'] });
       await queryClient.cancelQueries({ queryKey: ['product', productId] });
-      await queryClient.cancelQueries({ queryKey: ['favorites'] }); // Также отменяем запросы к списку избранного
+      await queryClient.cancelQueries({ queryKey: ['favorites'] });
 
       const previousProduct = queryClient.getQueryData<Product>(['product', productId]);
       const previousProductsLists = queryClient.getQueriesData<InfiniteData<PaginatedProducts>>({ queryKey: ['products'] });
@@ -44,8 +47,9 @@ export const useFavorite = () => {
       return { previousProduct, previousProductsLists };
     },
 
-    onError: (_err, variables, context) => {
-      toast.error("Не удалось изменить избранное");
+    // --- ИЗМЕНЕНИЕ 2: Используем централизованный обработчик ошибок ---
+    onError: (err, variables, context) => {
+      // Сначала откатываем оптимистичное обновление
       if (context?.previousProduct) {
         queryClient.setQueryData(['product', variables.productId], context.previousProduct);
       }
@@ -54,20 +58,19 @@ export const useFavorite = () => {
               queryClient.setQueryData(queryKey, data);
           });
       }
+      
+      // Затем показываем ошибку через наш хелпер
+      handleApiError(err);
     },
     
-    // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
-    // Используем onSuccess для инвалидации, чтобы гарантировать, что сервер уже обновил данные
+    // onSuccess остается без изменений
     onSuccess: (_data, variables) => {
       // Инвалидируем кэши, чтобы при следующем заходе на страницу данные были свежими.
-      // Это происходит "в фоне" и не мешает оптимистичному обновлению.
       queryClient.invalidateQueries({ queryKey: ['product', variables.productId] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
-
-    // onSettled больше не нужен для инвалидации, его можно убрать или использовать для других целей
   });
 
   return mutation;

@@ -1,5 +1,5 @@
 // src/api/services/orders.api.ts
-import api from '@/api';
+import api from '@/api/client';
 // ИСПРАВЛЕНИЕ: Убедимся, что тип PaginatedOrders импортируется, если он нужен
 import type { Order, OrderCreate, PaginatedOrders } from '@/types';
 

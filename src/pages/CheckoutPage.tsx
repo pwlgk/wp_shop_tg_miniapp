@@ -10,7 +10,8 @@ import { useBackButton } from '@/hooks/useBackButton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDescription } from "@/components/ui/alert";
-import { User, Phone, Mail, MapPin, Edit, Loader2 } from 'lucide-react';
+// --- 1. Импортируем иконку Info ---
+import { User, Phone, Mail, MapPin, Edit, Loader2, Info } from 'lucide-react';
 import type { CartResponse, OrderCreate, UserDashboard, UserProfile } from '@/types';
 import { toast } from 'sonner';
 import { TotalsCard } from '@/components/shared/TotalsCard';
@@ -18,7 +19,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AxiosError } from 'axios';
 import { BrandHeader } from '@/components/shared/BrandHeader';
 
-// Этот компонент остается без изменений
 const CheckoutProfileField = ({ icon, value }: { icon: React.ReactNode, value: string | null | undefined }) => (
     <div className="flex items-center gap-3 text-sm">
         <div className="text-muted-foreground">{icon}</div>
@@ -26,12 +26,11 @@ const CheckoutProfileField = ({ icon, value }: { icon: React.ReactNode, value: s
     </div>
 );
 
-// Скелетон остается без изменений
 const CheckoutPageSkeleton = () => (
     <>
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
         <div className="p-4 space-y-6 animate-pulse">
-            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-8 w-3-4" />
             <Skeleton className="h-48 w-full rounded-2xl" />
             <Skeleton className="h-40 w-full rounded-2xl" />
             <Skeleton className="h-64 w-full rounded-2xl" />
@@ -69,9 +68,6 @@ export const CheckoutPage = () => {
     const { data: user, isLoading: isUserLoading } = useQuery<UserProfile>({ queryKey: ['me'], queryFn: getMe });
     const { data: dashboard, isLoading: isDashboardLoading } = useQuery<UserDashboard>({ queryKey: ['dashboard'], queryFn: getDashboard });
     
-    // --- УДАЛЕНО: Состояние для модального окна больше не нужно ---
-    // const [isEditSheetOpen, setEditSheetOpen] = useState(false);
-
     const createOrderMutation = useMutation({
         mutationFn: (orderData: OrderCreate) => createOrder(orderData),
         onSuccess: (newOrder) => {
@@ -130,11 +126,10 @@ export const CheckoutPage = () => {
         if (!user?.first_name || !user?.billing.phone) {
             toast.warning("Пожалуйста, заполните ваши данные", {
                 description: "Для оформления заказа необходимо указать имя и номер телефона.",
-                // --- ИЗМЕНЕНО: Открываем страницу вместо модального окна ---
                 action: { 
                     label: "Заполнить", 
                     onClick: () => navigate('/profile/edit', { 
-                        state: { from: location.pathname } // Передаем текущий путь для возврата
+                        state: { from: location.pathname }
                     }) 
                 },
             });
@@ -172,13 +167,12 @@ export const CheckoutPage = () => {
                     <Card className="rounded-2xl">
                         <CardHeader className="flex flex-row justify-between items-center">
                             <CardTitle>Ваши данные</CardTitle>
-                            {/* --- ИЗМЕНЕНО: Кнопка ведет на страницу редактирования --- */}
                             <Button 
                                 variant="ghost" 
                                 size="icon" 
                                 className="-mr-2 rounded-full" 
                                 onClick={() => navigate('/profile/edit', { 
-                                    state: { from: location.pathname } // Передаем текущий путь для возврата
+                                    state: { from: location.pathname }
                                 })}
                             >
                                 <Edit className="h-4 w-4" />
@@ -227,6 +221,17 @@ export const CheckoutPage = () => {
                         onPointsToggle={handlePointsToggle}
                         finalTotal={finalTotal}
                     />
+
+                    {/* --- 2. ДОБАВЛЕН НОВЫЙ БЛОК --- */}
+                    <Card className="rounded-2xl bg-secondary/50 border-dashed">
+                        <CardContent className="flex items-start gap-4 p-4 text-sm">
+                            <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                            <p className="text-muted-foreground">
+                                После заказа мы свяжемся с вами для согласования доставки и оплаты.
+                            </p>
+                        </CardContent>
+                    </Card>
+                    {/* ----------------------------- */}
                 </div>
             </div>
             
@@ -240,8 +245,6 @@ export const CheckoutPage = () => {
                     Подтвердить заказ
                 </Button>
             </footer>
-
-            {/* --- УДАЛЕНО: Компонент модального окна больше не рендерится здесь --- */}
         </>
     );
 };

@@ -6,7 +6,8 @@ import { useCartStore } from '@/store/cartStore';
 import { useEffect, useState, useRef } from 'react';
 import type { Product, CartResponse, CartItem } from '@/types';
 import { toast } from 'sonner';
-import { AxiosError } from 'axios';
+// --- ИЗМЕНЕНИЕ 1: Импортируем наш новый хелпер ---
+import { handleApiError } from '@/api/errorHandler';
 
 export const useCart = () => {
   const queryClient = useQueryClient();
@@ -17,7 +18,7 @@ export const useCart = () => {
   
   const shownNotificationIds = useRef(new Set<string>());
 
-  const { data: cartData, isLoading, isError } = useQuery<CartResponse, Error>({
+  const { data: cartData, isLoading, isError, error } = useQuery<CartResponse, Error>({
     queryKey: ['cart', { points: pointsToSpend, coupon: appliedCouponCode }],
     queryFn: () => getCart({ 
       pointsToSpend, 
@@ -28,12 +29,7 @@ export const useCart = () => {
   useEffect(() => {
     if (cartData) {
       setCart(cartData.items);
-
-      // --- ЛОГИКА УПРОЩЕНА ---
-      // Сбрасывать pointsToSpend здесь не нужно, т.к. это вызовет
-      // лишние запросы. Сброс будет происходить после мутаций.
       
-      // Обработка уведомлений от сервера
       if (cartData.notifications && cartData.notifications.length > 0) {
         const lastNotification = cartData.notifications[cartData.notifications.length - 1];
         const notificationId = `${lastNotification.level}-${lastNotification.message}`;
@@ -45,19 +41,24 @@ export const useCart = () => {
         }
       }
       
-      // Если сервер сказал, что купон не применен, сбрасываем его на клиенте
       if (cartData.applied_coupon_code === null && appliedCouponCode !== null) {
         setAppliedCouponCode(null);
       }
     }
   }, [cartData, setCart, appliedCouponCode, setAppliedCouponCode]);
+
+  // Обработка общей ошибки загрузки корзины
+  useEffect(() => {
+    if (isError) {
+      handleApiError(error);
+    }
+  }, [isError, error]);
   
-  // --- ИЗМЕНЕНИЕ 1: Добавляем onSuccess в мутации для сброса баллов ---
   const handleMutationSuccess = () => {
     if (pointsToSpend > 0) {
         console.log('[useCart] Resetting points after cart mutation.');
         setPointsToSpend(0);
-        // toast.info("Скидка баллами была сброшена из-за изменения состава корзины.");
+        toast.info("Скидка баллами была сброшена из-за изменения состава корзины.");
     }
   };
 
@@ -69,7 +70,7 @@ export const useCart = () => {
   const updateItemMutation = useMutation({
     mutationFn: ({ productId, quantity, variationId }: { productId: number; quantity: number; variationId?: number }) => 
         updateCartItem({ productId, quantity, variationId }),
-    onSuccess: handleMutationSuccess, // <-- Сбрасываем баллы при успехе
+    onSuccess: handleMutationSuccess,
     onMutate: async ({ productId, quantity, variationId }) => {
         await queryClient.cancelQueries({ queryKey: ['cart'] });
         const previousCart = queryClient.getQueryData<CartResponse>(['cart']);
@@ -82,11 +83,12 @@ export const useCart = () => {
         });
         return { previousCart };
     },
-    onError: (err: AxiosError<{ detail: string }>, _variables, context) => {
+    // --- ИЗМЕНЕНИЕ 2: Используем централизованный обработчик ---
+    onError: (err, _variables, context) => {
         if (context?.previousCart) {
             queryClient.setQueryData(['cart'], context.previousCart);
         }
-        toast.error("Ошибка обновления корзины", { description: err.response?.data?.detail || "Пожалуйста, попробуйте снова." });
+        handleApiError(err); // <-- Вызываем наш хелпер
     },
     onSettled: handleMutationEnd,
   });
@@ -94,7 +96,7 @@ export const useCart = () => {
   const removeItemMutation = useMutation({
     mutationFn: ({ productId, variationId }: { productId: number; variationId?: number }) => 
         removeCartItem({ productId, variationId }),
-    onSuccess: handleMutationSuccess, // <-- Сбрасываем баллы при успехе
+    onSuccess: handleMutationSuccess,
     onMutate: async ({ productId, variationId }) => {
         await queryClient.cancelQueries({ queryKey: ['cart'] });
         const previousCart = queryClient.getQueryData<CartResponse>(['cart']);
@@ -107,11 +109,12 @@ export const useCart = () => {
         
         return { previousCart };
     },
-    onError: (_err, _variables, context) => {
-        toast.error("Не удалось удалить товар");
+    // --- ИЗМЕНЕНИЕ 3: Используем централизованный обработчик ---
+    onError: (err, _variables, context) => {
         if (context?.previousCart) {
             queryClient.setQueryData(['cart'], context.previousCart);
         }
+        handleApiError(err); // <-- Вызываем наш хелпер
     },
     onSettled: handleMutationEnd,
   });

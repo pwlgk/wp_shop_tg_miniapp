@@ -1,5 +1,5 @@
 // src/api/services/favorites.api.ts
-import api from '@/api';
+import api from '@/api/client';
 import type { PaginatedFavorites } from '@/types';
 
 // Добавление товара в избранное (уже есть)

@@ -1,5 +1,5 @@
 // src/api/services/user.api.ts
-import api from '@/api';
+import api from '@/api/client';
 import type { LoyaltyHistory, ReferralInfo, UserDashboard, UserProfile, UserUpdate } from '@/types';
 
 // Эта функция остаётся для HomePage

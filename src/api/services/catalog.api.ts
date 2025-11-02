@@ -1,5 +1,5 @@
 // src/api/services/catalog.api.ts
-import api from '@/api';
+import api from '@/api/client';
 import type { ProductCategory, PaginatedProducts, Product, Banner } from '@/types';
 
 // Получение всех категорий

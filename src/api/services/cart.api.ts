@@ -1,5 +1,5 @@
 // src/api/services/cart.api.ts
-import api from '@/api';
+import api from '@/api/client';
 import type { CartItemUpdate, CartResponse } from '@/types';
 
 // Получение содержимого корзины

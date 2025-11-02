@@ -1,5 +1,5 @@
 // src/api/services/notifications.api.ts
-import api from '@/api';
+import api from '@/api/client';
 import type { PaginatedNotifications } from '@/types';
 
 interface GetNotificationsParams {

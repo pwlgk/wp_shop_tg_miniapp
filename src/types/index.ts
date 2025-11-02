@@ -1,9 +1,10 @@
 // src/types/index.ts
 
 // Тип для ответа от эндпоинта /auth/telegram
-export interface TokenResponse {
+export interface TokenPair {
   access_token: string;
-  token_type: string;
+  refresh_token: string;
+  token_type: "bearer";
 }
 
 // Тип для данных дашборда с /users/me/dashboard
@@ -15,7 +16,10 @@ export interface UserDashboard {
   balance: number;
   level: string;
   has_unread_notifications: boolean;
-  profile_completion_status: 'complete' | 'new_user_prompt' | 'incomplete_profile_indicator';
+  profile_completion_status:
+    | "complete"
+    | "new_user_prompt"
+    | "incomplete_profile_indicator";
   has_active_orders: boolean;
   loyalty_progress: {
     current_spending: number;
@@ -34,7 +38,7 @@ export interface ProductCategory {
   slug: string;
   image_src: string | null;
   // Добавляем children, чтобы TypeScript знал о вложенности
-  children?: ProductCategory[]; 
+  children?: ProductCategory[];
 }
 
 export interface ProductImage {
@@ -104,12 +108,12 @@ export interface Product {
   on_sale: boolean;
   short_description: string;
   description: string;
-  stock_quantity: number | null; 
+  stock_quantity: number | null;
   images: ProductImage[];
   categories: ProductCategory[];
   is_favorite: boolean;
   sku: string | null;
-  stock_status: 'instock' | 'outofstock' | 'onbackorder';
+  stock_status: "instock" | "outofstock" | "onbackorder";
   variations: ProductVariation[] | null; // <-- ГЛАВНОЕ ИЗМЕНЕНИЕ
   average_rating: string;
   rating_count: number;
@@ -132,7 +136,7 @@ export interface CartItem {
 }
 
 export interface CartNotification {
-  level: 'info' | 'success' | 'warning' | 'error';
+  level: "info" | "success" | "warning" | "error";
   message: string;
 }
 
@@ -158,7 +162,7 @@ export interface CartItemUpdate {
 export interface Banner {
   id: number;
   title: string;
-  content_type: 'image' | 'video'; // <-- Новое поле
+  content_type: "image" | "video"; // <-- Новое поле
   media_url: string; // <-- Переименовано с image_url
   link_url?: string | null;
 }
@@ -186,10 +190,10 @@ export interface Address {
 }
 
 export interface PaginatedResponse {
-    total_items: number;
-    total_pages: number;
-    current_page: number;
-    size: number;
+  total_items: number;
+  total_pages: number;
+  current_page: number;
+  size: number;
 }
 
 export interface PaginatedOrders extends PaginatedResponse {
@@ -243,7 +247,8 @@ export interface Order {
   can_be_cancelled: boolean;
 }
 
-export interface PaginatedOrders extends PaginatedResponse { // Убедитесь, что PaginatedResponse существует
+export interface PaginatedOrders extends PaginatedResponse {
+  // Убедитесь, что PaginatedResponse существует
   items: Order[];
 }
 
@@ -261,14 +266,28 @@ export interface LoyaltyHistory {
   transactions: LoyaltyTransaction[];
 }
 
-
-interface HeadingBlock { type: 'h1' | 'h2' | 'h3' | 'h4'; content: string; }
-interface ParagraphBlock { type: 'p'; content: string; }
-interface ListBlock { type: 'ul' | 'ol'; items: string[]; }
-interface SeparatorBlock { type: 'hr'; }
+interface HeadingBlock {
+  type: "h1" | "h2" | "h3" | "h4";
+  content: string;
+}
+interface ParagraphBlock {
+  type: "p";
+  content: string;
+}
+interface ListBlock {
+  type: "ul" | "ol";
+  items: string[];
+}
+interface SeparatorBlock {
+  type: "hr";
+}
 
 // Объединяем все типы блоков в один
-export type ContentBlock = HeadingBlock | ParagraphBlock | ListBlock | SeparatorBlock;
+export type ContentBlock =
+  | HeadingBlock
+  | ParagraphBlock
+  | ListBlock
+  | SeparatorBlock;
 
 // Тип для ответа от /pages/{slug}
 export interface StructuredPage {
@@ -281,7 +300,12 @@ export interface StructuredPage {
 
 export interface Notification {
   id: number;
-  type: 'order_status_update' | 'points_earned' | 'promo' | 'points_update' | string; // Добавляем string для будущих типов
+  type:
+    | "order_status_update"
+    | "points_earned"
+    | "promo"
+    | "points_update"
+    | string; // Добавляем string для будущих типов
   title: string;
   message: string | null;
   created_at: string;
@@ -289,9 +313,9 @@ export interface Notification {
   is_read: boolean;
   action_url: string | null;
   related_entity_id: string | null; // Может быть ID заказа
-  action_text?: string;     // Текст для основной кнопки (например, "К товарам")
-  promo_code?: string;      // Промокод, если он есть
-  duration?: number;        // Длительность показа сторис в секундах
+  action_text?: string; // Текст для основной кнопки (например, "К товарам")
+  promo_code?: string; // Промокод, если он есть
+  duration?: number; // Длительность показа сторис в секундах
 }
 export interface PaginatedNotifications extends PaginatedResponse {
   items: Notification[];
@@ -301,7 +325,7 @@ export interface Story {
   id: number;
   title: string;
   description: string;
-  content_type: 'image' | 'video';
+  content_type: "image" | "video";
   media_url: string;
   link_url: string | null;
 }

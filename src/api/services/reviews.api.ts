@@ -1,5 +1,5 @@
 // src/api/services/reviews.api.ts
-import api from '@/api';
+import api from '@/api/client';
 import type { PaginatedReviews, ReviewCreate, ProductReview, MediaUploadResponse } from '@/types';
 
 // Получение отзывов

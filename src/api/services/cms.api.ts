@@ -1,5 +1,5 @@
 // src/api/services/cms.api.ts
-import api from '@/api';
+import api from '@/api/client';
 import type { StructuredPage } from '@/types';
 
 export const getPageBySlug = async (slug: string): Promise<StructuredPage> => {

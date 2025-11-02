@@ -4,70 +4,64 @@ import { useEffect, useState } from 'react';
 import { useRawInitData } from '@telegram-apps/sdk-react';
 import { useAuthStore } from '@/store/authStore';
 import { loginViaTelegram } from '@/api/services/auth.api';
+import axios from 'axios';
 
-// --- ИЗМЕНЕНИЕ 1: Добавляем sdkReady в параметры хука ---
 export const useAuth = (isHydrated: boolean, sdkReady: boolean) => {
-  const { accessToken, setToken } = useAuthStore();
+  const { accessToken, setTokens } = useAuthStore();
   const [status, setStatus] = useState<'pending' | 'success' | 'error'>('pending');
   const [error, setError] = useState<string | null>(null);
 
   const initDataRaw = useRawInitData();
 
   useEffect(() => {
-    // Детальное логирование для отладки
-    console.log('[useAuth Hook]', {
-      isHydrated,
-      sdkReady,
-      hasAccessToken: !!accessToken,
-      initDataRaw: initDataRaw ? `present (${initDataRaw.length} chars)` : 'missing',
-      status
-    });
-
-    // --- ИЗМЕНЕНИЕ 2: Ждем, пока и гидрация, и SDK будут готовы ---
-    if (!isHydrated || !sdkReady) {
-      // Если одно из условий не выполнено, мы просто выходим и ждем следующего ре-рендера.
-      // Не меняем статус, чтобы хук оставался в состоянии 'pending'.
+    if (status !== 'pending' || !isHydrated || !sdkReady || accessToken) {
       return;
-    }
-
-    if (accessToken) {
-      // Если токен уже есть, аутентификация не нужна.
-      if (status !== 'success') {
-        setStatus('success');
-      }
-      return;
-    }
-
-    // Если все готово, но initData нет - это критическая ошибка.
-    if (!initDataRaw) {
-      console.error('[useAuth Hook] CRITICAL: SDK is ready, but initDataRaw is missing. Cannot authenticate.');
-      setError('Критическая ошибка: не найдены данные для инициализации (initData).');
-      setStatus('error');
-      return;
-    }
-    
-    // Предотвращаем повторный запуск аутентификации, если она уже идет или завершилась
-    if (status !== 'pending') {
-        return;
     }
 
     const authenticate = async () => {
+      console.groupCollapsed('[useAuth] Starting Authentication Process');
       try {
-        console.log('[useAuth Hook] Authenticating with initData...');
-        const response = await loginViaTelegram(initDataRaw);
-        setToken(response.access_token);
+        let authData: string | undefined = initDataRaw;
+        console.log("Initial raw initData from SDK:", authData);
+        
+        if (!authData && import.meta.env.DEV) {
+          console.warn("Using mock data for development.");
+          authData = import.meta.env.VITE_MOCK_INIT_DATA;
+          if (!authData) throw new Error('DEV MODE: VITE_MOCK_INIT_DATA is not defined.');
+        }
+
+        if (!authData) {
+          throw new Error('Критическая ошибка: не найдены данные для инициализации (initData).');
+        }
+        
+        const tokens = await loginViaTelegram(authData);
+        console.log("Tokens received, passing to AuthStore...");
+        setTokens(tokens);
         setStatus('success');
-        console.log('[useAuth Hook] Authentication successful.');
-      } catch (err: any) {
-        console.error('[useAuth Hook] Authentication failed.', err);
-        setError(err.message || 'Произошла ошибка при аутентификации.');
+        console.log("Authentication successful.");
+
+      } catch (err: unknown) {
+        console.error("Authentication failed with error:", err);
+        if (axios.isAxiosError(err)) {
+          if (err.response?.status === 429) {
+            setError("Слишком много попыток входа. Пожалуйста, подождите минуту и перезапустите приложение.");
+          } else {
+            setError(err.response?.data?.detail || err.message || 'Произошла ошибка при аутентификации.');
+          }
+        } else if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Произошла неизвестная ошибка при аутентификации.');
+        }
         setStatus('error');
+      } finally {
+        console.groupEnd();
       }
     };
 
     authenticate();
     
-  }, [isHydrated, sdkReady, accessToken, setToken, initDataRaw, status]); // Добавлен status в зависимости
+  }, [isHydrated, sdkReady, accessToken, initDataRaw, status, setTokens]);
 
   return {
     isLoading: status === 'pending',

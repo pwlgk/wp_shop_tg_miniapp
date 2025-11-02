@@ -24,5 +24,6 @@ dist-ssr
 *.sw?
 .certs
 *.bak
-.env.prod
+.env*
+!.env.example
 prepare_project.py

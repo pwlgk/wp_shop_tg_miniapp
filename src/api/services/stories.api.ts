@@ -1,5 +1,5 @@
 // src/api/services/stories.api.ts
-import api from '@/api';
+import api from '@/api/client';
 import type { Story } from '@/types';
 
 export const getStories = async (): Promise<Story[]> => {
