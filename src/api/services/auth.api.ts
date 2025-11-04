@@ -1,44 +1,36 @@
 // src/api/services/auth.api.ts
 
 import axios from 'axios';
-import apiClient from '../client';
+// import apiClient from '../client';
 import type { TokenPair } from '@/types';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+if (!API_BASE_URL) {
+    throw new Error("CRITICAL: VITE_API_BASE_URL is not defined.");
+}
+
+// --- loginViaTelegram ---
 interface TelegramLoginPayload {
   init_data: string;
 }
-
 export const loginViaTelegram = async (initDataRaw: string): Promise<TokenPair> => {
-  console.log('[AuthAPI] Attempting to login via Telegram...');
-  try {
-    const response = await apiClient.post<TokenPair>('/auth/telegram', { init_data: initDataRaw } as TelegramLoginPayload);
-    console.log('[AuthAPI] loginViaTelegram successful. Raw response data:', response.data);
-    if (!response.data.refresh_token) {
-      console.error('[AuthAPI] CRITICAL: API response for login is missing refresh_token!');
-    }
-    return response.data;
-  } catch (error) {
-    console.error('[AuthAPI] loginViaTelegram failed:', error);
-    throw error;
-  }
+  console.log('[AuthAPI] Sending login request via clean axios to avoid interceptors...');
+  
+  // --- ИЗМЕНЕНИЕ: Используем 'axios.post' напрямую, а не 'apiClient' ---
+  // Это гарантирует, что никакие интерсепторы (например, добавляющие Authorization)
+  // не будут применены к этому конкретному запросу.
+  const response = await axios.post<TokenPair>(`${API_BASE_URL}/auth/telegram`, { 
+    init_data: initDataRaw 
+  } as TelegramLoginPayload);
+  
+  console.log('[AuthAPI] loginViaTelegram successful. Raw response data:', response.data);
+  return response.data;
 };
 
-interface RefreshTokenPayload {
-  refresh_token: string;
-}
 
-// Эта функция будет вызываться напрямую из интерсептора
+// --- refreshAccessToken ---
+// Эта функция УЖЕ использует 'axios.post' напрямую, что правильно.
 export const refreshAccessToken = async (refreshToken: string): Promise<TokenPair> => {
-  console.log('[AuthAPI] Attempting to refresh access token...');
-  try {
-    const response = await axios.post<TokenPair>(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, { refresh_token: refreshToken } as RefreshTokenPayload);
-    console.log('[AuthAPI] refreshAccessToken successful. Raw response data:', response.data);
-    if (!response.data.refresh_token) {
-      console.error('[AuthAPI] CRITICAL: API response for refresh is missing a new refresh_token!');
-    }
-    return response.data;
-  } catch (error) {
-    console.error('[AuthAPI] refreshAccessToken failed:', error);
-    throw error;
-  }
+  const response = await axios.post<TokenPair>(`${API_BASE_URL}/auth/refresh`, { refresh_token: refreshToken });
+  return response.data;
 }

@@ -1,17 +1,19 @@
 // src/AppInitializer.tsx
 
 import { useEffect, useState } from 'react';
+// --- ИЗМЕНЕНИЕ: `useIsFetching` больше не нужен ---
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useTheme } from 'next-themes';
 import { init } from '@telegram-apps/sdk-react';
+
 import { useIsHydrated } from './hooks/useIsHydrated';
 import { useAuth } from './hooks/useAuth';
 import { useDeepLink } from './hooks/useDeepLink';
-import { useNavigate } from 'react-router-dom';
-import App from './App';
-import { motion } from 'framer-motion';
-import { ErrorPage } from './pages/ErrorPage';
-import { useQuery } from '@tanstack/react-query';
 import { getDashboard } from './api/services/user.api';
-import { useTheme } from 'next-themes';
+import { ErrorPage } from './pages/ErrorPage';
+import App from './App';
 
 const AppLoader = () => {
     const { resolvedTheme } = useTheme();
@@ -37,58 +39,62 @@ const AppLoader = () => {
 
 export const AppInitializer = () => {
     const navigate = useNavigate();
-    const [isNavigationDone, setIsNavigationDone] = useState(false);
     const [sdkReady, setSdkReady] = useState(false);
+    const [isNavigationDone, setIsNavigationDone] = useState(false);
 
     useEffect(() => {
         try {
-            console.log('AppInitializer: Initializing SDK...');
+            console.log('[AppInitializer] Initializing SDK...');
             init();
-            console.log('AppInitializer: SDK init() called successfully.');
             setSdkReady(true);
+            console.log('[AppInitializer] SDK init() called successfully.');
         } catch (error) {
-            console.error('AppInitializer: CRITICAL - Failed to initialize SDK!', error);
+            console.error('[AppInitializer] CRITICAL: Failed to initialize SDK!', error);
+            setSdkReady(true);
         }
     }, []);
 
     const isHydrated = useIsHydrated();
     const { path: deepLinkPath, isFirstInSession } = useDeepLink();
     
-    // Теперь этот вызов корректен, так как useAuth принимает 2 аргумента
     const { isLoading: isAuthLoading, error: authError, isAuthenticated } = useAuth(isHydrated, sdkReady);
     
-    const { data: dashboard, isLoading: isDashboardLoading, isError: isDashboardError } = useQuery({
+    const { 
+        data: dashboard, 
+        isLoading: isDashboardLoading,
+        isError: isDashboardError 
+    } = useQuery({
         queryKey: ['dashboard'],
         queryFn: getDashboard,
         enabled: isAuthenticated,
         retry: 1,
     });
 
+    // --- ИЗМЕНЕНИЕ: Хук `useIsFetching` удален, так как он больше не используется ---
+
     useEffect(() => {
-        if (!isNavigationDone && sdkReady) {
+        // Логика диплинков теперь зависит только от isAuthenticated,
+        // так как isDashboardLoading не должен ее блокировать.
+        if (isAuthenticated && !isNavigationDone) {
             if (deepLinkPath) {
-                console.log(`AppInitializer: Navigating to deep link path: ${deepLinkPath}`);
                 navigate(deepLinkPath, { replace: isFirstInSession });
             }
             setIsNavigationDone(true);
         }
-    }, [deepLinkPath, isFirstInSession, isNavigationDone, navigate, sdkReady]);
+    }, [isAuthenticated, isNavigationDone, deepLinkPath, isFirstInSession, navigate]);
 
-    const isLoading = 
-        !isHydrated || 
-        !sdkReady ||
-        isAuthLoading || 
-        !isNavigationDone || 
-        (isAuthenticated && isDashboardLoading);
+    // Логика состояния загрузки теперь зависит только от критических,
+    // блокирующих операций.
+    const isLoading = isAuthLoading || isDashboardLoading;
 
     if (isLoading) {
         return <AppLoader />;
     }
 
     if (authError) {
-        return <ErrorPage statusCode={401} message={authError} />;
+        return <ErrorPage statusCode={authError.status} message={authError.message} />;
     }
-
+    
     if (!isAuthenticated) {
         return <ErrorPage statusCode={401} message="Не удалось аутентифицировать пользователя. Попробуйте перезапустить приложение." />;
     }

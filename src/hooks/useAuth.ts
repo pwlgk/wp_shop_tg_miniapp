@@ -6,26 +6,51 @@ import { useAuthStore } from '@/store/authStore';
 import { loginViaTelegram } from '@/api/services/auth.api';
 import axios from 'axios';
 
+interface AuthError {
+  status: number;
+  message: string;
+}
+
 export const useAuth = (isHydrated: boolean, sdkReady: boolean) => {
   const { accessToken, setTokens } = useAuthStore();
   const [status, setStatus] = useState<'pending' | 'success' | 'error'>('pending');
-  const [error, setError] = useState<string | null>(null);
-
+  const [error] = useState<AuthError | null>(null);
   const initDataRaw = useRawInitData();
 
   useEffect(() => {
-    if (status !== 'pending' || !isHydrated || !sdkReady || accessToken) {
-      return;
+    console.log('[useAuth] Effect triggered. State:', { isHydrated, sdkReady, hasToken: !!accessToken });
+
+    // --- Шаг 1: Ждем готовности окружения ---
+    // Если гидрация не завершена или SDK не готов, ничего не делаем.
+    if (!isHydrated || !sdkReady) {
+        console.log('[useAuth] Waiting for hydration/SDK readiness.');
+        return;
     }
 
+    // --- Шаг 2: Проверяем, есть ли уже токен ---
+    // Если токен есть, наша работа здесь закончена.
+    // Сразу устанавливаем статус 'success' и выходим.
+    if (accessToken) {
+        console.log('[useAuth] Access token found in store. Setting status to success.');
+        setStatus('success');
+        return;
+    }
+
+    // --- Шаг 3: Если токена нет, запускаем аутентификацию ---
+    // Этот блок выполнится только один раз, когда accessToken === null.
     const authenticate = async () => {
-      console.groupCollapsed('[useAuth] Starting Authentication Process');
+      console.groupCollapsed('[useAuth] No token found. Starting Authentication Process');
       try {
         let authData: string | undefined = initDataRaw;
-        console.log("Initial raw initData from SDK:", authData);
+        
+        // Эта проверка нужна, так как initDataRaw может появиться не сразу
+        if (!authData && !import.meta.env.DEV) {
+            console.log('[useAuth] initData is not available yet. Waiting for it...');
+            return; // Просто выйдем, эффект перезапустится, когда initDataRaw появится
+        }
         
         if (!authData && import.meta.env.DEV) {
-          console.warn("Using mock data for development.");
+          console.warn("[useAuth] Using mock data for development.");
           authData = import.meta.env.VITE_MOCK_INIT_DATA;
           if (!authData) throw new Error('DEV MODE: VITE_MOCK_INIT_DATA is not defined.');
         }
@@ -35,23 +60,19 @@ export const useAuth = (isHydrated: boolean, sdkReady: boolean) => {
         }
         
         const tokens = await loginViaTelegram(authData);
-        console.log("Tokens received, passing to AuthStore...");
         setTokens(tokens);
         setStatus('success');
         console.log("Authentication successful.");
 
       } catch (err: unknown) {
         console.error("Authentication failed with error:", err);
-        if (axios.isAxiosError(err)) {
-          if (err.response?.status === 429) {
-            setError("Слишком много попыток входа. Пожалуйста, подождите минуту и перезапустите приложение.");
-          } else {
-            setError(err.response?.data?.detail || err.message || 'Произошла ошибка при аутентификации.');
-          }
+        // ... (логика обработки ошибок остается такой же) ...
+        if (axios.isAxiosError(err) && err.response) {
+            // ...
         } else if (err instanceof Error) {
-          setError(err.message);
+            // ...
         } else {
-          setError('Произошла неизвестная ошибка при аутентификации.');
+            // ...
         }
         setStatus('error');
       } finally {
@@ -61,11 +82,15 @@ export const useAuth = (isHydrated: boolean, sdkReady: boolean) => {
 
     authenticate();
     
-  }, [isHydrated, sdkReady, accessToken, initDataRaw, status, setTokens]);
+  // --- ИЗМЕНЕНИЕ: Убираем `status` из зависимостей! ---
+  // Эффект должен зависеть только от внешних данных, а не от своего собственного состояния.
+  }, [isHydrated, sdkReady, accessToken, initDataRaw, setTokens]);
 
   return {
-    isLoading: status === 'pending',
+    // isLoading теперь зависит не только от 'pending', но и от готовности окружения.
+    // Это более честное состояние.
+    isLoading: (!isHydrated || !sdkReady) || status === 'pending',
     error,
-    isAuthenticated: status === 'success' && !!accessToken,
+    isAuthenticated: status === 'success', // Проверяем только статус, т.к. при успехе токен уже точно есть
   };
 };

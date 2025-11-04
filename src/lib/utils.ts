@@ -1,4 +1,4 @@
-import type { Product, Story } from "@/types";
+import type { Product, Story, UserProfile } from "@/types";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -86,4 +86,41 @@ export const stripHtml = (htmlString: string): string => {
   
   // 3. Сжимаем множественные пробелы в один и обрезаем по краям
   return plainText.replace(/\s+/g, ' ').trim();
+};
+
+/**
+ * Проверяет, что у пользователя заполнены все необходимые для заказа поля.
+ * Возвращает массив названий незаполненных полей.
+ * @param user - Объект профиля пользователя.
+ * @returns {string[]} - Массив с названиями полей, например, ["Имя", "Телефон"].
+ */
+export const validateCheckoutProfile = (user: UserProfile | undefined | null): string[] => {
+  if (!user) {
+    return ["Имя", "Фамилия", "Телефон", "Email"];
+  }
+
+  const missingFields: string[] = [];
+
+  // Проверяем имя
+  if (!user.first_name || user.first_name.trim().length < 2) {
+    missingFields.push("Имя");
+  }
+
+  // Проверяем фамилию (может быть в billing или в корне)
+  const lastName = user.last_name || user.billing?.last_name;
+  if (!lastName || lastName.trim().length < 2) {
+    missingFields.push("Фамилия");
+  }
+
+  // Проверяем телефон
+  if (!user.billing?.phone || user.billing.phone.trim().length < 10) {
+    missingFields.push("Телефон");
+  }
+
+  // Проверяем email (и игнорируем заглушку от Telegram)
+  if (!user.email || user.email.endsWith('@telegram.user')) {
+    missingFields.push("Email");
+  }
+
+  return missingFields;
 };

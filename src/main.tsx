@@ -12,6 +12,7 @@ import './index.css';
 import { ScrollToTop } from './components/shared/ScrollToTop';
 // --- ИЗМЕНЕНИЕ 2: Импортируем наш универсальный обработчик ---
 import { handleApiError } from './api/errorHandler';
+import { useTelegramSafeArea } from './hooks/useTelegramSafeArea';
 
 // --- ИЗМЕНЕНИЕ 3: Создаем QueryClient с новой, более мощной конфигурацией ---
 const queryClient = new QueryClient({
@@ -45,6 +46,26 @@ const queryClient = new QueryClient({
   },
 });
 
+const AppToaster = () => {
+  const safeArea = useTelegramSafeArea();
+  
+  // Высота контентной части шапки (то, что под "челкой")
+  const HEADER_CONTENT_HEIGHT = 48;
+
+  const toasterStyle = {
+    // top = отступ "челки" + высота контента шапки + небольшой доп. отступ
+    top: `${(safeArea.top || 0) + HEADER_CONTENT_HEIGHT + 1}px`,
+  };
+
+  return (
+    <Toaster 
+      richColors 
+      position="top-center"
+      toastOptions={{ style: toasterStyle }}
+    />
+  );
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
@@ -52,8 +73,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <ScrollToTop />
         <QueryClientProvider client={queryClient}>
           <AppInitializer />
-          {/* Toaster для показа уведомлений */}
-          <Toaster richColors position="top-center" />
+          {/* --- ИЗМЕНЕНИЕ 3: Используем нашу обертку вместо прямого вызова Toaster --- */}
+          <AppToaster />
         </QueryClientProvider>
       </BrowserRouter>
     </ThemeProvider>

@@ -9,15 +9,15 @@ import { getCart } from '@/api/services/cart.api';
 import { useBackButton } from '@/hooks/useBackButton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertDescription } from "@/components/ui/alert";
-// --- 1. Импортируем иконку Info ---
-import { User, Phone, Mail, MapPin, Edit, Loader2, Info } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { User, Phone, Mail, MapPin, Edit, Loader2, Info, AlertTriangle } from 'lucide-react';
 import type { CartResponse, OrderCreate, UserDashboard, UserProfile } from '@/types';
 import { toast } from 'sonner';
 import { TotalsCard } from '@/components/shared/TotalsCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AxiosError } from 'axios';
 import { BrandHeader } from '@/components/shared/BrandHeader';
+import { validateCheckoutProfile } from '@/lib/utils';
 
 const CheckoutProfileField = ({ icon, value }: { icon: React.ReactNode, value: string | null | undefined }) => (
     <div className="flex items-center gap-3 text-sm">
@@ -30,7 +30,7 @@ const CheckoutPageSkeleton = () => (
     <>
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
         <div className="p-4 space-y-6 animate-pulse">
-            <Skeleton className="h-8 w-3-4" />
+            <Skeleton className="h-8 w-3/4" />
             <Skeleton className="h-48 w-full rounded-2xl" />
             <Skeleton className="h-40 w-full rounded-2xl" />
             <Skeleton className="h-64 w-full rounded-2xl" />
@@ -122,10 +122,16 @@ export const CheckoutPage = () => {
         return price > 0 ? price : 0;
     }, [cartData, pointsToSpend]);
     
+    // Вычисляем список незаполненных полей
+    const missingProfileFields = useMemo(() => validateCheckoutProfile(user), [user]);
+
     const handlePlaceOrder = () => {
-        if (!user?.first_name || !user?.billing.phone) {
+        // Проверяем, есть ли незаполненные поля
+        if (missingProfileFields.length > 0) {
+            const description = `Необходимо заполнить: ${missingProfileFields.join(', ')}.`;
+            
             toast.warning("Пожалуйста, заполните ваши данные", {
-                description: "Для оформления заказа необходимо указать имя и номер телефона.",
+                description: description,
                 action: { 
                     label: "Заполнить", 
                     onClick: () => navigate('/profile/edit', { 
@@ -153,7 +159,8 @@ export const CheckoutPage = () => {
         );
     }
 
-    const displayEmail = user.email.endsWith('@telegram.user') ? null : user.email;
+    const displayEmail = user.email && !user.email.endsWith('@telegram.user') ? user.email : null;
+    const displayName = `${user.first_name || ''} ${user.last_name || user.billing?.last_name || ''}`.trim() || null;
 
     return (
         <>
@@ -179,11 +186,21 @@ export const CheckoutPage = () => {
                             </Button>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                            <CheckoutProfileField icon={<User className="h-4 w-4" />} value={`${user.first_name || ''} ${user.last_name || ''}`.trim() || null} />
+                            <CheckoutProfileField icon={<User className="h-4 w-4" />} value={displayName} />
                             <CheckoutProfileField icon={<Phone className="h-4 w-4" />} value={user.billing.phone} />
                             <CheckoutProfileField icon={<MapPin className="h-4 w-4" />} value={user.billing.city} />
                             <CheckoutProfileField icon={<Mail className="h-4 w-4" />} value={displayEmail} />
-                            {!user.first_name || !user.billing.phone ? <AlertDescription className="pt-2 !mt-4 text-destructive">Имя и телефон обязательны для заказа.</AlertDescription> : null}
+                            
+                            {/* Улучшенный блок с предупреждением */}
+                            {missingProfileFields.length > 0 && (
+                                <Alert variant="destructive" className="mt-4">
+                                    <AlertTriangle className="h-4 w-4" />
+                                    <AlertTitle>Заполните профиль</AlertTitle>
+                                    <AlertDescription>
+                                        Для оформления заказа не хватает следующих данных: {missingProfileFields.join(', ')}.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                         </CardContent>
                     </Card>
                     
@@ -222,7 +239,6 @@ export const CheckoutPage = () => {
                         finalTotal={finalTotal}
                     />
 
-                    {/* --- 2. ДОБАВЛЕН НОВЫЙ БЛОК --- */}
                     <Card className="rounded-2xl bg-secondary/50 border-dashed">
                         <CardContent className="flex items-start gap-4 p-4 text-sm">
                             <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
@@ -231,7 +247,6 @@ export const CheckoutPage = () => {
                             </p>
                         </CardContent>
                     </Card>
-                    {/* ----------------------------- */}
                 </div>
             </div>
             

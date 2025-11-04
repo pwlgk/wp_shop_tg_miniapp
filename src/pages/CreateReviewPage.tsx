@@ -1,5 +1,6 @@
 // src/pages/CreateReviewPage.tsx
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,6 +41,10 @@ const CreateReviewPageSkeleton = () => (
   </>
 );
 
+const MAX_FILES = 5;
+const MAX_FILE_SIZE_MB = 3;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
 export const CreateReviewPage = () => {
   useBackButton();
   const { id } = useParams<{ id: string }>();
@@ -79,18 +84,47 @@ export const CreateReviewPage = () => {
   });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const files = Array.from(event.target.files).slice(0, 5 - imageFiles.length);
-      setImageFiles(prev => [...prev, ...files]);
-      const urls = files.map(file => URL.createObjectURL(file));
+    if (!event.target.files) return;
+
+    const newFiles = Array.from(event.target.files);
+    const validFiles: File[] = [];
+    
+    for (const file of newFiles) {
+      if (imageFiles.length + validFiles.length >= MAX_FILES) {
+        toast.warning(`Можно прикрепить не более ${MAX_FILES} изображений.`);
+        break;
+      }
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        toast.error(`Файл "${file.name}" слишком большой.`, {
+          description: `Максимальный размер файла: ${MAX_FILE_SIZE_MB} МБ.`,
+        });
+        continue;
+      }
+      validFiles.push(file);
+    }
+
+    if (validFiles.length > 0) {
+      setImageFiles(prev => [...prev, ...validFiles]);
+      const urls = validFiles.map(file => URL.createObjectURL(file));
       setImagePreviews(prev => [...prev, ...urls]);
     }
+    
+    event.target.value = '';
   };
 
   const removeImage = (index: number) => {
+    const previewToRemove = imagePreviews[index];
+    URL.revokeObjectURL(previewToRemove);
     setImageFiles(files => files.filter((_, i) => i !== index));
     setImagePreviews(previews => previews.filter((_, i) => i !== index));
   };
+
+  useEffect(() => {
+    // Очищаем все URL-объекты при размонтировании компонента, чтобы избежать утечек памяти
+    return () => {
+      imagePreviews.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [imagePreviews]);
 
   const onSubmit = (values: z.infer<typeof reviewSchema>) => {
     if (imageFiles.length > 0) {
@@ -178,29 +212,40 @@ export const CreateReviewPage = () => {
             />
 
             <FormItem>
-              <FormLabel>Прикрепить фото (до 5 шт.)</FormLabel>
-              <div className="flex flex-wrap items-center gap-2">
+              <FormLabel>Прикрепить фото (до {MAX_FILES} шт., макс. {MAX_FILE_SIZE_MB} МБ)</FormLabel>
+              <div className="grid grid-cols-4 gap-3 sm:grid-cols-5">
                 {imagePreviews.map((src, index) => (
-                  // ИСПРАВЛЕНИЕ: Удален класс 'shrink-0'
-                  <div key={index} className="relative h-20 w-20">
+                  <div key={src} className="relative aspect-square">
                     <img src={src} className="h-full w-full object-cover rounded-lg" alt={`Preview ${index}`} />
                     <Button
+                      type="button"
                       variant="destructive"
                       size="icon"
                       className="absolute top-1 right-1 h-6 w-6 rounded-full bg-black/50 text-white hover:bg-black/70"
                       onClick={() => removeImage(index)}
+                      aria-label={`Удалить изображение ${index + 1}`}
                     >
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
-                {imageFiles.length < 5 && (
-                  // ИСПРАВЛЕНИЕ: Удален класс 'shrink-0'
-                  <Label htmlFor="review-images" className="cursor-pointer h-20 w-20 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary">
+                {imageFiles.length < MAX_FILES && (
+                  <Label 
+                    htmlFor="review-images" 
+                    className="cursor-pointer aspect-square border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  >
                     <ImagePlus className="h-8 w-8" />
+                    <span className="sr-only">Добавить изображение</span>
                   </Label>
                 )}
-                <Input id="review-images" type="file" multiple accept="image/*" className="sr-only" onChange={handleFileChange} />
+                <Input 
+                  id="review-images" 
+                  type="file" 
+                  multiple 
+                  accept="image/jpeg, image/png, image/webp" 
+                  className="sr-only" 
+                  onChange={handleFileChange} 
+                />
               </div>
             </FormItem>
 

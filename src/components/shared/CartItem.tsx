@@ -70,7 +70,7 @@ export const CartItem = ({ item, onRemove, onUpdate, isUpdating }: CartItemProps
                             {attributesString && (
                                 <p className="text-sm text-muted-foreground mt-1">{attributesString}</p>
                             )}
-                            <p className="text-primary font-bold mt-1">{parseFloat(price).toFixed(0)} ₽</p>
+                            <p className="font-bold mt-1">{parseFloat(price).toFixed(0)} ₽</p>
                         </div>
                         {/* 2. Добавили mt-auto, чтобы прижать этот блок к низу */}
                         <div className="flex items-center justify-between mt-auto pt-2">
