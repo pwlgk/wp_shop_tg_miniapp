@@ -44,6 +44,7 @@ const CreateReviewPageSkeleton = () => (
 const MAX_FILES = 5;
 const MAX_FILE_SIZE_MB = 3;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export const CreateReviewPage = () => {
   useBackButton();
@@ -238,14 +239,16 @@ export const CreateReviewPage = () => {
                     <span className="sr-only">Добавить изображение</span>
                   </Label>
                 )}
-                <Input 
-                  id="review-images" 
-                  type="file" 
-                  multiple 
-                  accept="image/jpeg, image/png, image/webp" 
-                  className="sr-only" 
-                  onChange={handleFileChange} 
-                />
+                <div className="absolute opacity-0 pointer-events-none">
+                        <Input 
+                            id="review-images" 
+                            type="file" 
+                            multiple 
+                            accept={ALLOWED_IMAGE_TYPES.join(",")}
+                            onChange={handleFileChange} 
+                            disabled={imageFiles.length >= MAX_FILES}
+                        />
+                    </div>
               </div>
             </FormItem>
 

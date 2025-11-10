@@ -1,4 +1,5 @@
 // src/pages/ReferralPage.tsx
+
 import { useQuery } from '@tanstack/react-query';
 import { getReferralInfo } from '@/api/services/user.api';
 import { getSettings } from '@/api/services/settings.api';
@@ -12,14 +13,19 @@ import { BrandHeader } from '@/components/shared/BrandHeader';
 
 const ReferralPageSkeleton = () => (
     <>
-            <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
+        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm"><BrandHeader /></header>
         <div className="p-4 space-y-8 animate-pulse">
             <div className="text-center space-y-3">
                 <Skeleton className="h-16 w-16 rounded-full mx-auto" />
-                <Skeleton className="h-8 w-3/4 mx-auto" />
+                <Skeleton className="h-8 w-3-4 mx-auto" />
                 <Skeleton className="h-4 w-full max-w-md mx-auto" />
             </div>
-            <Skeleton className="h-control-md w-full rounded-2xl" />
+            {/* Скелетон для блока со ссылкой и кнопками */}
+            <div className="flex items-center gap-2">
+                <Skeleton className="h-control-md w-full rounded-2xl" />
+                <Skeleton className="h-control-md w-control-sm rounded-full" />
+                <Skeleton className="h-control-md w-control-sm rounded-full" />
+            </div>
             <div className="space-y-4">
                 <Skeleton className="h-6 w-1/2 mx-auto" />
                 <div className="grid grid-cols-3 gap-2">
@@ -52,11 +58,39 @@ export const ReferralPage = () => {
 
     const isLoading = isReferralLoading || isSettingsLoading;
 
+    // Функция для копирования ссылки
     const handleCopyLink = () => {
         if (!referralInfo) return;
         navigator.clipboard.writeText(referralInfo.referral_link).then(() => {
             toast.success("Реферальная ссылка скопирована!");
+        }, () => {
+            toast.error("Не удалось скопировать ссылку.");
         });
+    };
+
+    // Функция для нативного шаринга
+    const handleShare = async () => {
+        if (!referralInfo || !settings) return;
+
+        const shareData = {
+            title: "Приглашение в KOSYNKA", // Заголовок для шаринга
+            text: `Привет! Зарегистрируйся по моей ссылке в KOSYNKA и получи ${settings.referral_welcome_bonus} баллов в подарок!`,
+            url: referralInfo.referral_link,
+        };
+
+        // Проверяем, доступен ли Web Share API
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (error) {
+                // Пользователь отменил диалог шаринга, ничего не делаем
+                console.log("Web Share был отменен", error);
+            }
+        } else {
+            // Если API не доступен, просто копируем ссылку и информируем пользователя
+            handleCopyLink();
+            toast.info("Ссылка скопирована, так как функция 'Поделиться' не поддерживается.");
+        }
     };
 
     if (isLoading) {
@@ -84,17 +118,35 @@ export const ReferralPage = () => {
                     </p>
                 </section>
                 
-                <section className="space-y-3">
-                    <div className="relative">
+                {/* --- ИЗМЕНЕНИЕ: Блок со ссылкой теперь содержит 2 кнопки --- */}
+                <section className="flex items-center gap-2">
+                    <div className="relative flex-grow">
                         <input 
                             readOnly 
                             value={referralInfo.referral_link}
-                            className="w-full h-control-md pr-12 pl-4 rounded-2xl bg-muted border-none text-center font-mono text-sm"
+                            className="w-full h-control-md pr-4 pl-4 rounded-2xl bg-muted border-none text-center font-mono text-sm"
                         />
-                        <Button variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2 h-control-sm w-control-sm" onClick={handleCopyLink}>
-                            <Copy className="h-5 w-5" />
-                        </Button>
                     </div>
+                    {/* Кнопка "Поделиться" */}
+                    <Button 
+                        variant="default" // Сделаем ее основной
+                        size="icon" 
+                        className="h-control-md w-control-md rounded-full shrink-0" 
+                        onClick={handleShare}
+                        aria-label="Поделиться ссылкой"
+                    >
+                        <Share2 className="h-5 w-5" />
+                    </Button>
+                    {/* Кнопка "Копировать" */}
+                    <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-control-md w-control-md rounded-full shrink-0" 
+                        onClick={handleCopyLink}
+                        aria-label="Скопировать ссылку"
+                    >
+                        <Copy className="h-5 w-5" />
+                    </Button>
                 </section>
 
                 <section>

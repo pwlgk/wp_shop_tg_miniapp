@@ -206,7 +206,7 @@ export const ProductPage = () => {
         {product.sku && <p className="text-sm text-muted-foreground">Артикул: {product.sku}</p>}
         
         <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-primary">{parseFloat(displayPrice || '0').toFixed(0)} ₽</span>
+          <span className="text-3xl font-bold">{parseFloat(displayPrice || '0').toFixed(0)} ₽</span>
           {displayOnSale && displayRegularPrice && (
             <span className="text-lg text-muted-foreground line-through">{parseFloat(displayRegularPrice).toFixed(0)} ₽</span>
           )}

@@ -47,7 +47,7 @@ export const ActiveOrdersCarousel = ({ orders }: { orders: Order[] }) => (
                         <p className="font-bold text-base">Заказ №{order.number}</p>
                         <p className={cn(
                             "text-sm font-medium",
-                            order.status === 'processing' ? 'text-blue-600' : 'text-amber-600'
+                            order.status === 'processing' ? 'text-muted-foreground' : 'text-muted-foreground'
                         )}>
                             {translateStatus(order.status)}
                         </p>
